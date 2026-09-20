@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "precojusto"
+version = "0.1.0"
+description = "Fair-price estimation for Brazilian public procurement: typed LLM features + shallow models, evaluated on an ablation ladder with a locked holdout."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Victor Eidt" }]
+dependencies = [
+  "numpy>=2.0",
+  "pandas>=2.2",
+  "scikit-learn>=1.6",
+  "typesafe-sdk>=0.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+include = ["precojusto*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["local", "data", "docs", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

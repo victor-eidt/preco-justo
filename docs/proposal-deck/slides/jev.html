@@ -1,0 +1,46 @@
+<section id="jev" data-transition="fade" style="background:#F4F5F1; color:#14241F; font-family:'IBM Plex Sans', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; justify-content:space-between; gap:34px">
+  <div style="display:flex; flex-direction:column; gap:14px">
+    <h2 style="font-family:'Source Serif 4', Georgia, serif; font-size:76px; font-weight:600; line-height:1.1">O que é o Jev</h2>
+    <p style="font-size:32px; line-height:1.4; color:#4A5550; width:1620px">Um modelo de linguagem que, em vez de gerar texto, responde perguntas tipadas e devolve probabilidades calibradas. Mesmo pré-treino de um ChatGPT, pós-treino diferente.</p>
+  </div>
+  <div style="display:flex; gap:26px; align-items:stretch">
+    <div style="flex:1; display:flex; flex-direction:column; gap:12px; background:#E4EFE9; padding:32px; border:1px solid #1C5D4E; border-radius:14px">
+      <h3 style="font-size:31px; font-weight:600; color:#1C5D4E">Escolha</h3>
+      <p style="font-size:26px; line-height:1.4; color:#33453D">"Em que categoria este item se encaixa?"</p>
+      <p style="font-family:'Source Serif 4', Georgia, serif; font-size:33px; font-weight:600; line-height:1.25">hardware de computador</p>
+      <p style="font-size:25px; color:#4A5550">confiança 1,00</p>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:12px; background:#E4EFE9; padding:32px; border:1px solid #1C5D4E; border-radius:14px">
+      <h3 style="font-size:31px; font-weight:600; color:#1C5D4E">Escala</h3>
+      <p style="font-size:26px; line-height:1.4; color:#33453D">"Quão específica é a descrição?"</p>
+      <p style="font-family:'Source Serif 4', Georgia, serif; font-size:33px; font-weight:600; line-height:1.25">3,00 de 4</p>
+      <p style="font-size:25px; color:#4A5550">especificação técnica completa e detalhada</p>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:12px; background:#E4EFE9; padding:32px; border:1px solid #1C5D4E; border-radius:14px">
+      <h3 style="font-size:31px; font-weight:600; color:#1C5D4E">Sim ou não</h3>
+      <p style="font-size:26px; line-height:1.4; color:#33453D">"É um equipamento físico entregue?"</p>
+      <p style="font-family:'Source Serif 4', Georgia, serif; font-size:33px; font-weight:600; line-height:1.25">0,96</p>
+      <p style="font-size:25px; color:#4A5550">probabilidade de sim, não um rótulo</p>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:12px; background:#FFFFFF; padding:32px; border:1px solid #D5DED8; border-radius:14px">
+      <h3 style="font-size:31px; font-weight:600; color:#4A5550">Mais 16 perguntas</h3>
+      <p style="font-size:26px; line-height:1.4; color:#4A5550">Duração, escala, abrangência, padronização, marca, certificação…</p>
+      <p style="font-family:'Source Serif 4', Georgia, serif; font-size:33px; font-weight:600; line-height:1.25">33 colunas</p>
+      <p style="font-size:25px; color:#4A5550">numa única chamada, em ~100 ms</p>
+    </div>
+  </div>
+  <p style="font-size:32px; line-height:1.45; color:#1C5D4E; width:1620px; font-weight:500">É assim que a frase do servidor vira a matriz numérica que um modelo de aprendizado de máquina consegue ler — com colunas que eu consigo nomear e explicar, ao contrário de contagem de palavras.</p>
+  <aside>~110s. O slide que explica a tecnologia. Use o MESMO item do slide anterior - o microcomputador all in one - para a sala acompanhar. Esses numeros sao a saida real do Jev para aquele registro.
+
+Comece pela frase do topo: é um LLM. Parte de um modelo pré-treinado como o ChatGPT, mas o pós-treinamento é outro — em vez de otimizar para gerar texto que agrada o leitor, ele é treinado para devolver decisões e probabilidades calibradas.
+
+Calibrado quer dizer: de todas as vezes que ele disser 0,80, ele precisa acertar em torno de 80% delas. É isso que permite usar o número como limiar no código.
+
+Os três cartões são os três tipos de pergunta. Diga o exemplo de cada um, sem ler tudo.
+
+O quarto cartão é o volume: 19 perguntas numa chamada só, virando 33 colunas.
+
+A frase final é a ponte para o próximo slide: texto livre vira matriz. E a diferença para TF-IDF é que cada coluna tem NOME e SIGNIFICADO.
+
+Se perguntarem por que não usar o ChatGPT direto: porque a resposta dele não vem calibrada, muda entre execuções e não deixa rastro auditável. Eu preciso de número que signifique alguma coisa.</aside>
+</section>

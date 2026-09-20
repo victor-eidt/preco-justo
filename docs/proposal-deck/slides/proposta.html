@@ -1,0 +1,58 @@
+<section id="proposta" data-section="A solução proposta e a hipótese que ela testa" data-transition="fade" style="background:#F4F5F1; color:#14241F; font-family:'IBM Plex Sans', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; justify-content:space-between; gap:30px">
+  <h2 style="font-family:'Source Serif 4', Georgia, serif; font-size:72px; font-weight:600; line-height:1.1">A proposta: aprende com o que foi pago, audita o que foi estimado</h2>
+
+  <div style="display:flex; flex-direction:column; gap:14px">
+    <p style="font-size:24px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#1C5D4E">Treino — compras já homologadas</p>
+    <div style="display:flex; gap:18px; align-items:stretch">
+      <div style="flex:1; display:flex; flex-direction:column; gap:8px; background:#FFFFFF; padding:26px; border:1px solid #D5DED8; border-radius:12px">
+        <h3 style="font-size:30px; font-weight:600">Compras.gov.br</h3>
+        <p style="font-size:25px; line-height:1.35; color:#4A5550">Preço unitário realmente pago, com descrição e quantidade.</p>
+      </div>
+      <div style="display:flex; align-items:center; width:36px"><x-shape kind="arrow-right" style="background:#1C5D4E; width:36px; height:20px"></x-shape></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:8px; background:#E4EFE9; padding:26px; border:1px solid #1C5D4E; border-radius:12px">
+        <h3 style="font-size:30px; font-weight:600">Jev</h3>
+        <p style="font-size:25px; line-height:1.35; color:#33453D">19 perguntas tipadas viram 33 colunas numéricas.</p>
+      </div>
+      <div style="display:flex; align-items:center; width:36px"><x-shape kind="arrow-right" style="background:#1C5D4E; width:36px; height:20px"></x-shape></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:8px; background:#FFFFFF; padding:26px; border:1px solid #D5DED8; border-radius:12px">
+        <h3 style="font-size:30px; font-weight:600">Modelo</h3>
+        <p style="font-size:25px; line-height:1.35; color:#4A5550">Aprende quanto cada tipo de item custa de verdade no Brasil.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:14px">
+    <p style="font-size:24px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#A8620E">Auditoria — editais novos</p>
+    <div style="display:flex; gap:18px; align-items:stretch">
+      <div style="flex:1; display:flex; flex-direction:column; gap:8px; background:#FFFFFF; padding:26px; border:1px solid #D5DED8; border-radius:12px">
+        <h3 style="font-size:30px; font-weight:600">PNCP</h3>
+        <p style="font-size:25px; line-height:1.35; color:#4A5550">Edital publicado, com a estimativa do próprio órgão.</p>
+      </div>
+      <div style="display:flex; align-items:center; width:36px"><x-shape kind="arrow-right" style="background:#9AA8A1; width:36px; height:20px"></x-shape></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:8px; background:#FFFFFF; padding:26px; border:1px solid #D5DED8; border-radius:12px">
+        <h3 style="font-size:30px; font-weight:600">Previsão</h3>
+        <p style="font-size:25px; line-height:1.35; color:#4A5550">O modelo diz quanto aquele item costuma custar.</p>
+      </div>
+      <div style="display:flex; align-items:center; width:36px"><x-shape kind="arrow-right" style="background:#A8620E; width:36px; height:20px"></x-shape></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:8px; background:#F7EEE1; padding:26px; border:1px solid #A8620E; border-radius:12px">
+        <h3 style="font-size:30px; font-weight:600">Fila de verificação</h3>
+        <p style="font-size:25px; line-height:1.35; color:#4A4035">Estimativas muito acima disso, com portão de confiança.</p>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:30px; line-height:1.45; color:#1C5D4E; width:1620px; font-weight:500">As duas pontas nunca se olham no treino: o modelo aprende com preço pago e é cobrado contra preço estimado. São números de processos diferentes, então a divergência significa alguma coisa.</p>
+  <aside>~110s. O slide central. Duas faixas, nao uma.
+
+Faixa de cima: TREINO. Aprendo com compras homologadas do Compras.gov.br, onde o preco e o que foi realmente pago.
+
+Faixa de baixo: AUDITORIA. Leio editais novos do PNCP, onde o preco e so a estimativa do orgao, e pergunto se ela faz sentido.
+
+A frase de baixo e a mais importante do slide e vale dizer devagar. Se eu treinasse na propria estimativa, o modelo aprenderia a prever estimativas - e uma estimativa inflada de um jeito comum seria prevista certinho e nunca seria marcada. Treinando no preco pago, os dois numeros vem de processos diferentes, e a diferenca entre eles carrega informacao.
+
+Ponto a nao errar: o Jev NAO preve o preco. Ele DESCREVE o item. Quem preve e o modelo.
+
+Nao preciso casar um edital com uma compra especifica. A ponte entre as duas fontes e o TEXTO - e e exatamente por isso que uma ferramenta de catalogo nao faz isso.
+
+Se perguntarem do desconto do pregao: sim, preco pago e sistematicamente menor que estimativa, porque a disputa derruba. Esse desconto tipico faz parte do modelo - eu marco o que excede o desconto esperado, nao qualquer coisa acima do previsto. Esta nos riscos.</aside>
+</section>

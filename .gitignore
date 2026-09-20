@@ -1,0 +1,26 @@
+# Local-only material: course PDFs, hand-off notes, logs, legacy scripts.
+local/
+logs/
+
+# Raw crawls (tens of MB, regenerable) and the LLM answer cache.
+data/raw/
+*.done
+
+# Ladder outputs written to the working dir
+results_dev.csv
+results_final.csv
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

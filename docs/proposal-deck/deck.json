@@ -1,0 +1,23 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-09-20T13:00:00Z" },
+  "title": "Preço Justo — Proposta TDE2",
+  "order": ["cover", "definicao", "problema", "licitacao", "dados", "relacionados", "jev", "proposta", "hipotese", "avaliacao", "etica", "riscos"],
+  "sections": {
+    "abertura": { "description": "O que é o Preço Justo, o problema que ele ataca, e como funciona uma compra pública", "start": "cover" },
+    "contexto": { "description": "Os dados disponíveis, quem já faz isso, e a tecnologia usada", "start": "dados" },
+    "proposta": { "description": "A solução proposta e a hipótese que ela testa", "start": "proposta" },
+    "metodo": { "description": "Como o trabalho será avaliado, a fundamentação ética e os riscos", "start": "avaliacao" }
+  },
+  "faces": {
+    "source-serif-4": {
+      "family": "Source Serif 4",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap"
+    },
+    "ibm-plex-sans": {
+      "family": "IBM Plex Sans",
+      "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    }
+  },
+  "designSystems": []
+}

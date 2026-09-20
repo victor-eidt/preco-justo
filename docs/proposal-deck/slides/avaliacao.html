@@ -1,0 +1,29 @@
+<section id="avaliacao" data-section="Como o trabalho será avaliado, a fundamentação ética e os riscos" data-transition="fade" style="background:#F4F5F1; color:#14241F; font-family:'IBM Plex Sans', Arial, sans-serif; padding:128px 128px 160px; display:flex; flex-direction:column; justify-content:space-between; gap:32px">
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <h2 style="font-family:'Source Serif 4', Georgia, serif; font-size:72px; font-weight:600; line-height:1.1">Como eu vou saber se funcionou</h2>
+    <p style="font-size:32px; line-height:1.4; color:#4A5550; width:1560px">Seis degraus. Cada um precisa vencer o anterior em dados que o modelo nunca viu.</p>
+  </div>
+  <table style="font-family:'IBM Plex Sans', Arial, sans-serif; font-size:28px; color:#14241F">
+    <tr><th style="width:8%; text-align:left; padding:14px; font-weight:600; color:#1C5D4E">#</th><th style="width:44%; text-align:left; font-weight:600; color:#1C5D4E">Degrau</th><th style="width:48%; text-align:left; font-weight:600; color:#1C5D4E">O que ele testa</th></tr>
+    <tr><td>1</td><td>Chutar sempre a média</td><td>Se nada vencer isto, nada aprendeu</td></tr>
+    <tr><td>2</td><td><b>Mediana do mesmo código de catálogo</b></td><td><b>O que um auditor de verdade já faz hoje</b></td></tr>
+    <tr><td>3</td><td>TF-IDF e um modelo raso</td><td>O modo clássico de usar texto</td></tr>
+    <tr><td>4</td><td>Perguntar o preço direto ao Jev</td><td>Quanto o LLM já sabe, sem treino nenhum</td></tr>
+    <tr><td>5</td><td><b>Atributos do Jev e um modelo</b></td><td><b>A hipótese: descrever, depois corrigir</b></td></tr>
+    <tr><td>6</td><td>Rede neural na mesma matriz</td><td>Raso contra profundo, entrada idêntica</td></tr>
+  </table>
+  <p style="font-size:29px; line-height:1.4; color:#4A5550; width:1620px">Divisão treino/teste por compra, não por item. Métricas: erro em escala logarítmica, matriz de confusão ao binarizar sobrepreço, e taxa de falsos positivos por dia de operação.</p>
+  <aside>~115s. Aqui voce mostra que sabe o que e um experimento.
+
+Insista no degrau 1. E o conceito que quase todo trabalho pula: um numero de erro sozinho nao significa nada, so significa alguma coisa comparado com uma baseline burra.
+
+O degrau 2 e o mais duro e foi adicionado depois que eu consegui o dado de catalogo. E exatamente o que o Painel de Precos do governo faz: pega o mesmo codigo de catalogo e compara com a mediana nacional. Vencer TF-IDF nao prova grande coisa. Vencer a mediana de catalogo prova.
+
+E tem uma sutileza que vale dizer: a mediana de catalogo so existe quando o item ESTA catalogado. O valor do meu projeto esta justamente nos itens que nao casam com codigo nenhum - onde essa baseline simplesmente nao pode ser calculada.
+
+Degrau 4 responde "por que nao usar so o LLM?". Eu nao descarto essa alternativa no discurso - eu MECO ela.
+
+O degrau 5 nao contem a pergunta de preco do degrau 4 na matriz. Senao o degrau 5 conteria secretamente o degrau 4 e a comparacao nao valeria.
+
+Se perguntarem por que log do preco: os valores variam em varias ordens de grandeza. Em escala logaritmica o erro vira proporcional - errar por um fator de dois pesa igual num toner e num servidor.</aside>
+</section>
