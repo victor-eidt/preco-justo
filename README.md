@@ -132,7 +132,7 @@ anomaly queue only needs the second. Full log in
 | Choice | Instead of | Why | Cost |
 |---|---|---|---|
 | Typed LLM questions as features | embeddings, or fine-tuning | every column has a name and a rubric; a wrong prediction can be traced to "the model thought this was enterprise-scale"; works at n≈100 | 19 questions is a hand-designed bottleneck; some signal in the text is lost |
-| Shallow models (GB/RF) | a neural net | 37 dense columns, a few hundred rows; the MLP rung is there to show it loses at this scale | will need revisiting past ~10k rows |
+| Shallow models (GB/RF) | a neural net | 36 dense columns, a few hundred rows; the MLP rung is there to show it loses at this scale | will need revisiting past ~10k rows |
 | Train on paid price, audit the estimate | train on the estimate | breaks the circularity; the disagreement is the signal | paid prices are systematically below estimates (auction discount), so the raw gap must be modelled before flagging |
 | log10 target | raw reais | prices span four orders of magnitude; a proportional error is the only one that means anything | absolute errors on cheap items are invisible |
 | Keyword sector filters at crawl time | classifying every listing with the LLM | free, runs on every row; false positives cost one LLM call later, at the item level | recall is bounded by the regex |

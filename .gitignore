@@ -7,8 +7,8 @@ data/raw/
 *.done
 
 # Ladder outputs written to the working dir
-results_dev.csv
-results_final.csv
+/results_dev.csv
+/results_final.csv
 
 # Python
 .venv/
