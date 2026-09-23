@@ -181,7 +181,8 @@ precojusto/         the package (schema, features, splits, ladder, sources)
 tests/              unit tests: feature conversion, split leakage, ladder smoke
 data/pilot/         682 tenders + features + recorded pilot results (committed)
 data/raw/           crawls and the LLM cache (gitignored, regenerable)
-docs/               architecture, decision records, experiment log, API notes
+docs/               architecture, decision records, experiment log, API notes,
+                    interface plan
 docs/proposal-deck/ the 12-slide proposal (pt-BR)
 ```
 
