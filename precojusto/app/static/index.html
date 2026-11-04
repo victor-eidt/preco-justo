@@ -237,6 +237,11 @@ tbody tr[aria-selected="true"] td { background: #f5f8ff; }
 .lv-form textarea:focus, .lv-form input:focus { outline: none; border-color: var(--info-edge); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
 .lv-form .btn { justify-content: center; }
 .lv-form .btn[disabled] { opacity: .6; pointer-events: none; }
+.lv-tpl { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.lv-tpl button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-3); border-radius: 999px; padding: 5px 10px; background: var(--card); font: inherit; font-size: 13px; color: inherit; cursor: pointer; transition: background-color .15s ease, transform .1s ease; }
+.lv-tpl button:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) { .lv-tpl button:hover { background: var(--well); } }
+.lv-tpl i { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 .lv-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
 #lv-msg:empty { display: none; }
 .dm-case { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; text-align: left;
@@ -430,6 +435,7 @@ tbody tr[aria-selected="true"] td { background: #f5f8ff; }
             <aside class="dm-side">
               <div class="card"><div class="ch"><h2 class="t-mtitle">Seu item</h2><span class="t-cap c3">chamada real ao Jev</span></div>
                 <form class="lv-form" id="lv-form">
+                  <div><span class="t-cap c2">Exemplos</span><div class="lv-tpl" id="lv-tpl"></div></div>
                   <label><span class="t-cap c2">Descrição do item</span>
                     <textarea id="lv-desc" placeholder="Ex.: Monitor LED 24 polegadas, Full HD, entradas HDMI e DisplayPort" required></textarea></label>
                   <div class="lv-row">
@@ -839,6 +845,18 @@ document.addEventListener("keydown", e => {
   }
 });
 /* --------------------------------------------------------------- live */
+// catalog-style wording, like PNCP lines; prices picked so each verdict shows up (checked live on 04/11)
+const LV_TPL = [
+  { t: "Switch 24 portas", st: "revisar", d: "Switch quantidade portas: 24, tipo portas: gigabit ethernet, velocidade porta: 1000 mbps, gerenciável, 4 portas SFP", p: "22.000,00", q: "10" },
+  { t: "Toner HP CF258A", st: "ok", d: "Cartucho Toner Impressora HP referência cartucho: CF258A, tipo cartucho: original", p: "600,00", q: "10" },
+  { t: "Teclado ABNT2", st: "ok", d: "Teclado Computador padrão: ABNT2, conexão: USB, tipo: com fio, teclas multimídia", p: "70,00", q: "10" },
+  { t: "Monitor 23,8\"", st: "sem_confianca", d: "Monitor Computador tamanho tela: 23,8 polegadas, resolução: 1920 x 1080, tipo tela: IPS, interface: HDMI", p: "900,00", q: "10" },
+  { t: "Computador genérico", st: "sem_confianca", d: "Computador, conforme especificações do termo de referência", p: "6.000,00", q: "10" },
+];
+$("#lv-tpl").innerHTML = LV_TPL.map((x, i) => `<button type="button" data-i="${i}"><i style="background:${statusColor(x.st)}"></i>${esc(x.t)}</button>`).join("");
+$("#lv-tpl").onclick = e => { const b = e.target.closest("button"); if (!b) return; const x = LV_TPL[+b.dataset.i];
+  $("#lv-desc").value = x.d; $("#lv-preco").value = x.p; $("#lv-qtd").value = x.q; $("#lv-go").focus(); };
+
 const num = v => { v = (v || "").trim().replace(/[R$\s]/g, ""); if (!v) return null; if (v.includes(",")) v = v.replace(/\./g, "").replace(",", "."); const n = parseFloat(v); return n > 0 ? n : null; };
 $("#lv-form").onsubmit = async e => {
   e.preventDefault();
