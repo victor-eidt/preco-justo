@@ -119,6 +119,7 @@ class State:
         self.cache = load_cache(str(LIVE_CACHE))
         self.lock = threading.Lock()
         self._client = None
+        self.demo = None
 
     def client(self):
         if self._client is None:
@@ -183,21 +184,63 @@ def item(item_id: int):
     return present(s.items[item_id])
 
 
-@app.post("/api/analisar")
-def analisar(p: Pedido):
-    s = state()
-    desc = " ".join(p.descricao.split())
-    row = {"item_desc": desc, "unidade": "UN", "quantidade": p.quantidade or 1.0,
+def analyze(s, desc, preco, quantidade):
+    """One item through the whole pipeline: LLM answers, model, verdict, neighbours."""
+    desc = " ".join(desc.split())
+    row = {"item_desc": desc, "unidade": "UN", "quantidade": quantidade or 1.0,
            "tipo": "Material", "objeto": ""}
-    try:
-        f = s.jev(row)
-    except Exception as e:  # noqa: BLE001
-        raise HTTPException(502, f"o LLM não respondeu ({type(e).__name__}); tente de novo") from e
+    f = s.jev(row)
     jev = pd.DataFrame([f])
     X = feature_matrix([desc], jev, s.model.columns, s.index)
     mid, lo, hi = (v[0] for v in s.model.predict(X))
-    v = verdict(p.preco, mid, lo, hi, hi - lo, s.model.width_cut, f, top_sim=float(X[0, -1]))
-    it = {"id": None, "descricao": desc, "estimado": p.preco, "quantidade": p.quantidade,
-          "unidade": "UN", **v, "jev": f, "llm_direto": 10 ** f["direct__log10"],
-          "parecidas": s.index.similar(desc)}
+    v = verdict(preco, mid, lo, hi, hi - lo, s.model.width_cut, f, top_sim=float(X[0, -1]))
+    return {"id": None, "descricao": desc, "estimado": preco, "quantidade": quantidade,
+            "unidade": "UN", **v, "jev": f, "llm_direto": 10 ** f["direct__log10"],
+            "parecidas": s.index.similar(desc)}
+
+
+@app.post("/api/analisar")
+def analisar(p: Pedido):
+    s = state()
+    try:
+        it = analyze(s, p.descricao, p.preco, p.quantidade)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(502, f"o LLM não respondeu ({type(e).__name__}); tente de novo") from e
     return present(it)
+
+
+# The demo cases. The first is a real PNCP line from the queue; the others run
+# through the same pipeline. Results are computed once and the LLM answers are
+# cached on disk, so the demo works with no network in the room.
+DEMO_REAL_PREFIX = "Switch quantidade portas: 16"
+DEMO_CASES = [
+    {"tag": "Exemplo", "titulo": "Switch 24 portas gerenciável",
+     "descricao": "Switch quantidade portas: 24, tipo portas: gigabit ethernet, "
+     "velocidade porta: 1000 mbps, gerenciável, suporte vlan", "preco": 18900.0, "quantidade": 4.0},
+    {"tag": "Exemplo", "titulo": "Notebook Core i5, 16 GB, SSD 512 GB",
+     "descricao": "Notebook tela: 15,6 polegadas, processador: Intel Core i5, "
+     "memória RAM: 16 GB, armazenamento SSD: 512 GB, sistema operacional: Windows 11 Pro",
+     "preco": 5200.0, "quantidade": 10.0},
+    {"tag": "Exemplo", "titulo": "Notebook genérico", "descricao": "Notebook, conforme especificações do Termo de Referência",
+     "preco": 7500.0, "quantidade": 10.0},
+]
+
+
+@app.get("/api/demo")
+def demo():
+    s = state()
+    if s.demo is None:
+        cases = []
+        real = next((it for i in s.order if (it := s.items[i])["estado"] == "revisar"
+                     and it["descricao"].startswith(DEMO_REAL_PREFIX)), None)
+        if real:
+            cases.append({**present(real), "demo_id": "real", "tag": "Caso real do PNCP"})
+        for k, c in enumerate(DEMO_CASES):
+            try:
+                it = analyze(s, c["descricao"], c["preco"], c["quantidade"])
+            except Exception:  # noqa: BLE001 - a case the LLM can't answer is left out
+                continue
+            cases.append({**present(it), "demo_id": f"ex{k}", "tag": c["tag"], "titulo": c["titulo"]})
+        s.demo = cases
+    return {"casos": s.demo, "compras_pagas": int(sum(r["n_compras"] for r in s.index.rows)),
+            "n_treino": s.n_train, "margem": MARGIN}

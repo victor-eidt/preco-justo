@@ -219,33 +219,89 @@ tbody tr[aria-selected="true"] td { background: #f5f8ff; }
 .direct b { color: var(--primary); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .foot { color: var(--muted); padding: 0 4px; margin: 0; }
 
-/* analyze */
-.two { display: grid; grid-template-columns: minmax(360px, 5fr) 7fr; gap: var(--s4); align-items: start; }
-.field { display: flex; flex-direction: column; gap: 6px; padding: 0 4px; }
-textarea, .inp { width: 100%; border: 1px solid var(--line-3); border-radius: 10px; background: var(--card); padding: 10px 12px; outline: none;
-  font-size: 16px; line-height: 24px; transition: border-color .15s, box-shadow .15s; }
-textarea { min-height: 132px; resize: vertical; }
-textarea::placeholder, .inp::placeholder { color: var(--muted); }
-textarea:focus, .inp:focus { border-color: var(--info-edge); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
-.money { position: relative; } .money span { position: absolute; left: 12px; top: 12px; color: var(--muted); } .money .inp { padding-left: 36px; }
-.form { display: flex; flex-direction: column; gap: var(--s4); }
-.err { color: #b91c1c; min-height: 16px; padding: 0 4px; }
-.exs { display: flex; flex-direction: column; }
-.ex { display: flex; align-items: center; gap: 10px; padding: 10px 4px; border: 0; border-top: 1px solid var(--line); background: none; cursor: pointer; text-align: left; width: 100%; }
-@media (hover: hover) and (pointer: fine) { .ex:hover { background: #fafafa; } }
-.ex .pr { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--secondary); }
-.emptyc { display: grid; place-items: center; text-align: center; min-height: 420px; padding: var(--s8); }
-.emptyc p { max-width: 44ch; margin: 6px auto 0; }
 .sk { background: linear-gradient(90deg, #f3f3f3, #fafafa, #f3f3f3); background-size: 200% 100%; animation: sh 1.2s linear infinite; border-radius: 6px; }
 @keyframes sh { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
 
 .view { display: none; } .view.on { display: block; }
 
+/* ---------------------------------------------------------- demo */
+:root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); }
+.demo { display: grid; grid-template-columns: 340px 1fr; gap: var(--s4); align-items: start; }
+.dm-side { position: sticky; top: var(--s6); display: flex; flex-direction: column; gap: var(--s4); }
+.dm-cases { display: flex; flex-direction: column; gap: 6px; }
+.dm-case { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; text-align: left;
+  padding: 10px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--card); cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease, transform .15s ease; }
+.dm-case:active { transform: scale(.98); }
+.dm-case[aria-pressed="true"] { border-color: var(--info-edge); background: #f5f8ff; }
+@media (hover: hover) and (pointer: fine) { .dm-case[aria-pressed="false"]:hover { background: var(--well); } }
+.dm-case:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+.dm-case .pr { font-variant-numeric: tabular-nums; color: var(--secondary); }
+.dm-steps { list-style: none; margin: 0; padding: 0 4px 4px; display: flex; flex-direction: column; }
+.dm-steps li { display: flex; align-items: center; gap: 10px; padding: 8px 0; color: var(--muted); transition: color .2s ease; }
+.dm-steps li + li { border-top: 1px solid var(--line); }
+.dm-steps .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 12px; font-weight: 500;
+  border: 1px solid var(--line-3); background: var(--card); transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+.dm-steps li.active { color: var(--primary); font-weight: 500; }
+.dm-steps li.active .n { border-color: var(--info); color: var(--info-ink); background: var(--info-tint); }
+.dm-steps li.done { color: var(--secondary); }
+.dm-steps li.done .n { border-color: var(--ink-btn); background: var(--ink-btn); color: #fff; }
+.dm-stage { display: flex; flex-direction: column; gap: var(--s4); min-width: 0; }
+.dm-empty { min-height: 460px; display: grid; place-items: center; text-align: center; }
+.dm-empty .big { width: 64px; height: 64px; border-radius: 50%; background: var(--ink-btn); color: #fff; display: grid; place-items: center;
+  margin: 0 auto var(--s4); border: 0; cursor: pointer; transition: transform .15s ease; }
+.dm-empty .big:active { transform: scale(.96); }
+.dm-empty .big svg { width: 24px; height: 24px; fill: #fff; stroke: none; }
+.dm-empty p { max-width: 46ch; margin: 6px auto 0; }
+
+.dstep { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s4);
+  opacity: 0; transform: translateY(16px); transition: opacity 350ms var(--ease-out), transform 500ms var(--ease-out), box-shadow 250ms ease; }
+.dstep.shown { opacity: 1; transform: none; }
+.dstep.active { box-shadow: 0 0 0 2px var(--info-tint), 0 8px 24px rgba(0,0,0,.05); }
+.dstep > header { display: flex; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s4); }
+.dstep .dn { width: 28px; height: 28px; border-radius: 50%; background: var(--ink-btn); color: #fff; display: grid; place-items: center; flex: none; font-weight: 600; }
+.dstep header p { margin: 2px 0 0; }
+.dstep header .badge { margin-left: auto; }
+.dm-type { margin: var(--s2) 0 0; color: var(--secondary); font-size: 16px; line-height: 24px; min-height: 24px; }
+.dm-type .caret { display: inline-block; width: 2px; height: 18px; background: var(--info); vertical-align: -3px; margin-left: 1px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.dm-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); margin-top: var(--s4); }
+.dm-bigline { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.dm-ratio { font-size: 32px; line-height: 40px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.dm-ratio.revisar { color: var(--warn-dot); } .dm-ratio.ok { color: var(--success); } .dm-ratio.sem_confianca { color: var(--secondary); }
+.dm-verdict { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s4); }
+.badge.xl { height: 32px; padding: 0 12px; font-size: 14px; line-height: 20px; }
+.badge.xl svg { width: 16px; height: 16px; }
+
+/* reveal choreography: hidden until the step gets .go */
+.stg > * { opacity: 0; transform: translateY(8px); transition: opacity 350ms var(--ease-out), transform 450ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 90ms); }
+.go .stg > * { opacity: 1; transform: none; }
+.dm-meter { height: 6px; border-radius: 3px; background: #f0f0f0; margin-top: 8px; overflow: hidden; }
+.dm-meter i { display: block; height: 100%; width: 100%; border-radius: 3px; background: var(--info); transform-origin: left center;
+  transform: scaleX(0); transition: transform 800ms var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms + 150ms); }
+.go .dm-meter i { transform: scaleX(var(--v)); }
+.pop { opacity: 0; transform: scale(.96); transition: opacity 250ms var(--ease-out), transform 300ms var(--ease-out); }
+.pop.on { opacity: 1; transform: none; }
+.anim .c-axis { opacity: 0; transition: opacity 300ms var(--ease-out); }
+.anim .c-band { transform-box: fill-box; transform-origin: left center; transform: scaleX(0); transition: transform 900ms var(--ease-out) 150ms; }
+.anim .c-tick { opacity: 0; transform: translateY(-12px); transition: opacity 250ms var(--ease-out) 750ms, transform 450ms var(--ease-out) 750ms; }
+.anim.go-band .c-axis, .anim.go-band .c-tick { opacity: 1; transform: none; }
+.anim.go-band .c-band { transform: none; }
+.anim .c-est { opacity: 0; transform: translateX(var(--dx, 120px)); transition: transform 1000ms var(--ease-in-out), opacity 200ms var(--ease-out); }
+.anim.go-est .c-est { opacity: 1; transform: none; }
+.instant, .instant * { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .dstep, .stg > *, .pop { transform: none !important; }
+  .anim .c-band, .anim .c-est, .anim .c-tick { transform: none !important; }
+  .dm-meter i { transition-duration: 1ms; }
+  .dm-type .caret { animation: none; }
+}
+@media (max-width: 1100px) { .demo { grid-template-columns: 1fr; } .dm-side { position: static; } .dm-facts { grid-template-columns: 1fr; } }
+
 @media (max-width: 1100px) {
   .kpis, .steps { grid-template-columns: 1fr 1fr; }
-  .two { grid-template-columns: 1fr; }
   .col-prev, .col-uf { display: none; }
 }
 @media (max-width: 760px) {
@@ -274,7 +330,7 @@ textarea:focus, .inp:focus { border-color: var(--info-edge); box-shadow: 0 0 0 3
     <nav class="nav" aria-label="Triagem">
       <div class="sec t-label"><svg class="i" viewBox="0 0 24 24" stroke-dasharray="2.5 2.5"><circle cx="12" cy="12" r="9"/></svg>Triagem</div>
       <button class="ni" data-view="fila" aria-current="page"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Fila de triagem<span class="ct badge b-info num" id="nav-rev">—</span></button>
-      <button class="ni" data-view="analisar"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/></svg>Analisar um item</button>
+      <button class="ni" data-view="demo"><svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg>Demonstração</button>
     </nav>
     <nav class="nav" aria-label="Fontes de dados">
       <div class="sec t-label"><svg class="i" viewBox="0 0 24 24" stroke-dasharray="2.5 2.5"><circle cx="12" cy="12" r="9"/></svg>Fontes de dados</div>
@@ -308,7 +364,7 @@ textarea:focus, .inp:focus { border-color: var(--info-edge); box-shadow: 0 0 0 3
             </div>
             <div class="acts">
               <span class="btn static"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span id="upd">—</span></span>
-              <button class="btn dark" data-go="analisar"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Analisar um item</button>
+              <button class="btn dark" data-go="demo"><svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg>Ver demonstração</button>
             </div>
           </div>
 
@@ -335,37 +391,22 @@ textarea:focus, .inp:focus { border-color: var(--info-edge); box-shadow: 0 0 0 3
         </div>
       </section>
 
-      <section class="view" id="v-analisar">
+      <section class="view" id="v-demo">
         <div class="page">
-          <div class="ph"><div>
-            <h1 class="t-title">Analisar um item</h1>
-            <p class="c2">Cole a descrição de um item e o preço que o órgão estimou. O LLM lê o texto e o modelo prevê quanto se costuma pagar.</p>
-          </div></div>
-          <div class="two">
-            <div class="card pad">
-              <form class="form" id="form" novalidate>
-                <div class="field"><label class="t-label" for="f-desc">Descrição do item</label>
-                  <textarea id="f-desc" placeholder="Ex.: Notebook Core i5, 16 GB de RAM, SSD 512 GB, tela 15,6 polegadas, garantia de 36 meses"></textarea></div>
-                <div class="row2">
-                  <div class="field"><label class="t-label" for="f-preco">Preço unitário estimado</label>
-                    <div class="money"><span>R$</span><input class="inp" id="f-preco" inputmode="decimal" autocomplete="off" placeholder="0,00"></div></div>
-                  <div class="field"><label class="t-label" for="f-qtd">Quantidade <span class="c3">(opcional)</span></label>
-                    <input class="inp" id="f-qtd" inputmode="numeric" autocomplete="off" placeholder="1"></div>
-                </div>
-                <div class="err t-cap" id="f-err" role="alert"></div>
-                <div style="padding:0 4px"><button class="btn dark" id="f-go" type="submit" style="width:100%;justify-content:center">Analisar</button></div>
-                <div>
-                  <div class="t-label c2" style="padding:0 4px 8px">Ou comece por um exemplo</div>
-                  <div class="exs" id="examples"></div>
-                </div>
-              </form>
+          <div class="ph">
+            <div><h1 class="t-title">Demonstração</h1>
+              <p class="c2">Escolha um caso e veja o sistema decidir, passo a passo, com os dados reais do modelo.</p></div>
+            <div class="acts">
+              <button class="btn" id="dm-skip">Pular para o resultado</button>
+              <button class="btn dark" id="dm-run"><svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg><span>Rodar demonstração</span></button>
             </div>
-            <div id="out">
-              <div class="card emptyc"><div>
-                <h3 class="t-mtitle">A ficha do item aparece aqui</h3>
-                <p class="c2">Preço previsto com a faixa de incerteza, compras parecidas que o governo já pagou e como o LLM leu a descrição.</p>
-              </div></div>
-            </div>
+          </div>
+          <div class="demo">
+            <aside class="dm-side">
+              <div class="card"><div class="ch"><h2 class="t-mtitle">Casos</h2></div><div class="dm-cases" id="dm-cases"></div></div>
+              <div class="card"><div class="ch"><h2 class="t-mtitle">Passos</h2><span class="t-cap c3">Espaço avança</span></div><ol class="dm-steps" id="dm-steps"></ol></div>
+            </aside>
+            <div class="dm-stage" id="dm-stage"></div>
           </div>
         </div>
       </section>
@@ -417,7 +458,7 @@ const CAT = {
 const catTile = c => { const k = CAT[c] || CAT._; return `<span class="tile" style="background:${k.bg};color:${k.fg}"><svg class="i" viewBox="0 0 24 24">${k.d}</svg></span>`; };
 
 const statusColor = st => ({ revisar: "#d97706", ok: "#16a34a", abaixo: "#64748b", sem_confianca: "#a3a3a3" }[st]);
-function drawChart(ch, it) {
+function drawChart(ch, it, anim = false) {
   const pts = [it.faixa_min, it.faixa_max, it.previsto, it.estimado].filter(v => v > 0);
   let lo = Math.log10(Math.min(...pts)), hi = Math.log10(Math.max(...pts));
   const pad = Math.max(0.25, (hi - lo) * 0.12); lo -= pad; hi += pad;
@@ -428,12 +469,13 @@ function drawChart(ch, it) {
   const short = v => v >= 1e6 ? `${v / 1e6} mi` : v >= 1e3 ? `${v / 1e3} mil` : `${v}`;
   let last = -1e9; const keep = ticks.filter(v => { const ok = x(v) - last >= 58; if (ok) last = x(v); return ok; });
   const bx = x(it.faixa_min), bw = Math.max(6, x(it.faixa_max) - bx), px = x(it.previsto), est = it.estimado ? x(it.estimado) : null, sc = statusColor(it.estado);
+  ch.classList.toggle("anim", anim);
   ch.innerHTML = `<svg width="${W}" height="84" viewBox="0 0 ${W} 84" role="img" aria-label="Faixa de ${brl(it.faixa_min)} a ${brl(it.faixa_max)}, previsto ${brl(it.previsto)}${it.estimado ? ", estimado " + brl(it.estimado) : ""}">
-    <line x1="${L}" x2="${W - R}" y1="${y0 + 14}" y2="${y0 + 14}" stroke="#e5e5e5"/>
-    ${keep.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="${y0 + 14}" y2="${y0 + 18}" stroke="#d4d4d4"/><text x="${x(v)}" y="${y0 + 32}" text-anchor="middle">R$ ${short(v)}</text>`).join("")}
-    <rect class="hit" data-t="Faixa de 80%: ${brl(it.faixa_min)} a ${brl(it.faixa_max)}" x="${bx}" y="${y0 - 10}" width="${bw}" height="20" rx="4" fill="#dbeafe" stroke="#93c5fd"/>
-    <rect class="hit" data-t="Previsto: ${brl(it.previsto)}" x="${px - 1.5}" y="${y0 - 16}" width="3" height="32" rx="1.5" fill="#1d4ed8"/>
-    ${est != null ? `<g class="hit" data-t="Estimado pelo órgão: ${brl(it.estimado)}"><rect x="${est - 9}" y="${y0 - 34}" width="18" height="48" fill="transparent"/>
+    <g class="c-axis"><line x1="${L}" x2="${W - R}" y1="${y0 + 14}" y2="${y0 + 14}" stroke="#e5e5e5"/>
+    ${keep.map(v => `<line x1="${x(v)}" x2="${x(v)}" y1="${y0 + 14}" y2="${y0 + 18}" stroke="#d4d4d4"/><text x="${x(v)}" y="${y0 + 32}" text-anchor="middle">R$ ${short(v)}</text>`).join("")}</g>
+    <rect class="hit c-band" data-t="Faixa de 80%: ${brl(it.faixa_min)} a ${brl(it.faixa_max)}" x="${bx}" y="${y0 - 10}" width="${bw}" height="20" rx="4" fill="#dbeafe" stroke="#93c5fd"/>
+    <rect class="hit c-tick" data-t="Previsto: ${brl(it.previsto)}" x="${px - 1.5}" y="${y0 - 16}" width="3" height="32" rx="1.5" fill="#1d4ed8"/>
+    ${est != null ? `<g class="hit c-est" style="--dx:${Math.max(60, W - est + 40)}px" data-t="Estimado pelo órgão: ${brl(it.estimado)}"><rect x="${est - 9}" y="${y0 - 34}" width="18" height="48" fill="transparent"/>
       <line x1="${est}" x2="${est}" y1="${y0 - 20}" y2="${y0 + 10}" stroke="${sc}" stroke-width="2"/>
       <circle cx="${est}" cy="${y0 - 22}" r="6" fill="${sc}" stroke="#fff" stroke-width="2"/></g>` : ""}
   </svg><div class="tip"></div>`;
@@ -444,7 +486,7 @@ function drawChart(ch, it) {
   });
 }
 const charts = new Map();
-const ro = new ResizeObserver(es => es.forEach(e => { const it = charts.get(e.target); if (it) drawChart(e.target, it); }));
+const ro = new ResizeObserver(es => es.forEach(e => { const it = charts.get(e.target); if (it) drawChart(e.target, it, e.target.classList.contains("anim")); }));
 
 function sheet(it) {
   const judged = it.estado !== "sem_confianca";
@@ -593,7 +635,7 @@ $("#d-close").onclick = closeDrawer; $("#scrim").onclick = closeDrawer;
 document.addEventListener("keydown", e => {
   if (!document.body.classList.contains("open")) return;
   if (e.key === "Escape") closeDrawer();
-  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+  if ((e.key === "ArrowDown" || e.key === "ArrowUp") && current != null) {
     const i = rowsNow.findIndex(r => r.id === current), j = i + (e.key === "ArrowDown" ? 1 : -1);
     if (rowsNow[j]) { e.preventDefault(); openItem(rowsNow[j].id); }
   }
@@ -602,7 +644,8 @@ document.addEventListener("keydown", e => {
 function go(view) {
   document.querySelectorAll(".ni[data-view]").forEach(n => n.setAttribute("aria-current", n.dataset.view === view ? "page" : "false"));
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + view));
-  $("#crumb").textContent = view === "fila" ? "Fila de triagem" : "Analisar um item";
+  $("#crumb").textContent = view === "fila" ? "Fila de triagem" : "Demonstração";
+  if (view === "demo") loadDemo();
   document.querySelector(".search").style.visibility = view === "fila" ? "visible" : "hidden";
   $("#scroll").scrollTop = 0;
 }
@@ -611,34 +654,159 @@ document.querySelectorAll("[data-go]").forEach(n => n.onclick = () => go(n.datas
 $("#tc-go").onclick = () => { go("fila"); setTimeout(() => $("#how").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 30); };
 $("#q").addEventListener("input", () => { page = 1; renderTable(); });
 
-const EXAMPLES = [
-  { t: "Switch 24 portas gerenciável", c: "infraestrutura_rede", d: "Switch quantidade portas: 24, tipo portas: gigabit ethernet, velocidade porta: 1000 mbps, gerenciável, suporte vlan", p: "18.900", q: "4" },
-  { t: "Notebook Core i5, 16 GB, SSD 512 GB", c: "hardware_computador", d: "Notebook tela: 15,6 polegadas, processador: Intel Core i5, memória RAM: 16 GB, armazenamento SSD: 512 GB, sistema operacional: Windows 11 Pro", p: "5.200", q: "10" },
-  { t: "Notebook genérico", c: "hardware_computador", d: "Notebook, conforme especificações do Termo de Referência", p: "7.500", q: "10" },
+/* --------------------------------------------------------------- demo */
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let D = null, sel = 0, token = 0, skip = null, running = false;
+const STEP_DEFS = [
+  { t: "O edital", sub: c => c.demo_id === "real" ? "Um item real, de um edital publicado no PNCP, com o preço que o órgão estimou." : "A descrição do item e o preço que o órgão estimou.", hold: 2600 },
+  { t: "O LLM lê a descrição", sub: () => "O Jev responde 19 perguntas tipadas sobre o texto. As respostas viram 36 números.", hold: 2800 },
+  { t: "Compras parecidas já pagas", sub: () => `Busca por descrição parecida em ${nf(D.compras_pagas)} compras do Compras.gov.br.`, hold: 2400 },
+  { t: "O modelo prevê o preço pago", sub: () => "Gradient boosting sobre as respostas do LLM. A faixa contém 80% dos preços pagos.", hold: 2800 },
+  { t: "Compara com a estimativa", sub: () => `Revisão só quando a estimativa passa ${String(D.margem).replace(".", ",")}× do teto da faixa.`, hold: 0 },
 ];
-$("#examples").innerHTML = EXAMPLES.map((e, i) => `<button type="button" class="ex" data-i="${i}">${catTile(e.c)}<span>${esc(e.t)}</span><span class="pr">R$ ${e.p}</span></button>`).join("");
-document.querySelectorAll(".ex").forEach(b => b.onclick = () => {
-  const e = EXAMPLES[+b.dataset.i]; $("#f-desc").value = e.d; $("#f-preco").value = e.p; $("#f-qtd").value = e.q; $("#form").requestSubmit();
+const wait = ms => new Promise(r => { const t = setTimeout(r, ms); skip = () => { clearTimeout(t); r(); }; });
+const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+function countUp(el, to, fmt, ms = 900) {
+  if (reduce || el.closest(".instant")) { el.textContent = fmt(to); return; }
+  const t0 = performance.now();
+  const tick = t => { const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(to * e); if (k < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+function typeText(el, text, ms) {
+  if (reduce || el.closest(".instant")) { el.textContent = text; return; }
+  const t0 = performance.now(), my = token;
+  el.innerHTML = '<span></span><i class="caret"></i>';
+  const span = el.firstChild;
+  const tick = t => { if (my !== token) return; const k = Math.min(1, (t - t0) / ms); span.textContent = text.slice(0, Math.round(text.length * k));
+    if (k < 1) requestAnimationFrame(tick); else el.querySelector(".caret")?.remove(); };
+  requestAnimationFrame(tick);
+}
+
+async function loadDemo() {
+  if (D) return;
+  D = await (await fetch("/api/demo")).json();
+  window.MARGEM = D.margem;
+  $("#dm-cases").innerHTML = D.casos.map((c, i) => `<button class="dm-case" data-i="${i}" aria-pressed="${i === sel}">${catTile(c.categoria)}
+      <span style="min-width:0"><span class="ell">${esc(c.titulo)}</span><span class="t-cap c3 ell">${esc(c.tag)}${c.orgao ? " · " + esc(titleCase(c.orgao)) : ""}</span></span>
+      <span class="pr">${brl(c.estimado)}</span></button>`).join("");
+  document.querySelectorAll(".dm-case").forEach(b => b.onclick = () => { sel = +b.dataset.i; markCase(); run(); });
+  $("#dm-steps").innerHTML = STEP_DEFS.map((d, i) => `<li data-k="${i}"><span class="n">${i + 1}</span>${d.t}</li>`).join("");
+  idle();
+}
+function markCase() { document.querySelectorAll(".dm-case").forEach(b => b.setAttribute("aria-pressed", +b.dataset.i === sel)); }
+function markSteps(k) { document.querySelectorAll("#dm-steps li").forEach(li => { const j = +li.dataset.k; li.className = j < k ? "done" : j === k ? "active" : ""; }); }
+function idle() {
+  token++; running = false; markSteps(-1); setRunLabel();
+  const c = D.casos[sel];
+  $("#dm-stage").innerHTML = `<div class="card dm-empty"><div>
+    <button class="big" id="dm-big" aria-label="Rodar demonstração"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg></button>
+    <h3 class="t-mtitle">${esc(c.titulo)}</h3><p class="c2">${esc(c.tag)} · estimado em ${brl(c.estimado)}. Aperte para ver o sistema ler, prever e decidir.</p></div></div>`;
+  $("#dm-big").onclick = () => run();
+}
+function setRunLabel() { $("#dm-run span").textContent = running || $("#dm-stage .dstep") ? "Repetir" : "Rodar demonstração"; }
+
+function stepCard(k, c) {
+  const d = STEP_DEFS[k];
+  const head = `<header><span class="dn">${k + 1}</span><div><h3 class="t-mtitle">${d.t}</h3><p class="t-cap c2">${esc(d.sub(c))}</p></div>`;
+  if (k === 0) {
+    const meta = [c.orgao && titleCase(c.orgao) + (c.uf ? " · " + c.uf : ""), c.esfera && ESFERA[c.esfera], c.quantidade && `${nf(c.quantidade)} unidades`].filter(Boolean);
+    return `${head}<span class="badge ${c.demo_id === "real" ? "b-info" : "b-plain"}">${esc(c.tag)}</span></header>
+      <div class="stg"><div style="--i:0;display:flex;align-items:center;gap:10px">${catTile(c.categoria)}<span class="t-title">${esc(c.titulo)}</span></div></div>
+      <p class="dm-type" data-type></p>
+      <div class="dm-facts stg">
+        <div class="met" style="--i:6"><div class="t-cap c2">Estimado pelo órgão</div><div class="v t-title">${brl(c.estimado)}</div></div>
+        <div class="met" style="--i:7;grid-column:span 2"><div class="t-cap c2">Quem compra</div><div class="v t-body" style="margin-top:8px">${esc(meta.join(" · ") || "—")}</div></div>
+      </div>`;
+  }
+  if (k === 1) {
+    const rd = c.leituras.slice(0, 8).map((r, i) => `<div style="--i:${i}"><div class="top2" style="display:flex;justify-content:space-between;gap:8px"><span class="c2">${esc(r.rotulo)}</span><span class="t-label" style="font-size:14px;line-height:20px">${esc(r.valor)}</span></div>
+      <div class="dm-meter"><i style="--i:${i};--v:${Math.max(.02, Math.min(1, r.nivel)).toFixed(3)}"></i></div></div>`).join("");
+    return `${head}<span class="badge b-plain">Jev</span></header><div class="reads stg">${rd}</div>
+      <div class="direct t-body pop" data-pop style="margin-top:16px"><span>Se perguntássemos o preço direto ao LLM, sem modelo treinado</span><b>${brl(c.llm_direto)}</b></div>`;
+  }
+  if (k === 2) {
+    const rows = (c.parecidas || []).slice(0, 3).map((s, i) => `<div class="sim" style="--i:${i}"><span class="ell">${esc(s.titulo || s.descricao)}</span>
+      <span class="t-cap c3 ell">${s.n_compras} ${s.n_compras === 1 ? "compra" : "compras"} · ex.: ${esc(titleCase(s.orgao || ""))}${s.uf ? ", " + esc(s.uf) : ""}${s.data ? " · " + s.data.slice(0, 4) : ""}</span>
+      <span class="p"><b>${brl(s.mediana)}</b><span class="t-cap c3">mediana paga</span></span></div>`).join("") || `<p class="c2">Nenhuma compra parecida o bastante.</p>`;
+    return `${head}<span class="badge b-plain">Compras.gov.br</span></header><div class="stg">${rows}</div>`;
+  }
+  if (k === 3) {
+    return `${head}<span class="badge b-plain">Modelo</span></header>
+      <div class="mets stg">
+        <div class="met" style="--i:0"><div class="t-cap c2">Previsto · preço pago</div><div class="v t-title" data-count="previsto">${brl(0)}</div></div>
+        <div class="met" style="--i:1"><div class="t-cap c2">Faixa de 80%</div><div class="v t-mtitle" style="margin-top:10px">${brl(c.faixa_min)} – ${brl(c.faixa_max)}</div></div>
+        <div class="met" style="--i:2"><div class="t-cap c2">Estimado pelo órgão</div><div class="v t-title c3">${brl(c.estimado)}</div></div>
+      </div>
+      <div class="chart"></div>
+      <div class="legend t-cap stg"><span style="--i:4"><i style="width:16px;height:10px;border-radius:3px;background:#dbeafe;box-shadow:inset 0 0 0 1px #93c5fd"></i>Faixa onde caem 80% dos preços pagos</span>
+        <span style="--i:5"><i style="width:3px;height:12px;border-radius:2px;background:#1d4ed8"></i>Previsto</span>
+        <span style="--i:6"><i style="width:10px;height:10px;border-radius:50%;background:${statusColor(c.estado)}"></i>Estimado pelo órgão</span></div>`;
+  }
+  const judged = c.estado !== "sem_confianca";
+  const main = judged
+    ? `<div class="dm-bigline"><span class="dm-ratio ${c.estado}" data-count="ratio">0×</span><span class="t-mtitle">${c.teto_x >= 1 ? "acima do teto da faixa" : "do teto: dentro da faixa"}</span></div>
+       <p class="c2" style="margin:6px 0 0">${brl(c.estimado)} estimado contra ${brl(c.faixa_min)} – ${brl(c.faixa_max)} que o governo costuma pagar.</p>`
+    : `<div class="dm-bigline"><span class="dm-ratio sem_confianca">O sistema não julga este item</span></div>
+       <div class="reasons t-body stg" style="margin-top:12px">${(c.motivos || []).map((m, i) => `<div style="--i:${i}"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/></svg>${esc(cap(m))}</div>`).join("")}</div>`;
+  return `${head}</header>${main}
+    <div class="dm-verdict pop" data-pop><span class="badge xl b-${c.estado}">${SI[c.estado]}${STATES[c.estado].label}</span>
+      <button class="btn" data-sheet>Ver ficha completa</button>
+      <span class="t-cap c3">${c.estado === "revisar" ? "Revisão não é acusação: é um pedido para alguém olhar." : c.estado === "ok" ? "Nada a revisar: a estimativa é compatível com o que se paga." : "Abster-se é uma resposta: sem base para comparar, o sistema não arrisca."}</span></div>`;
+}
+
+async function enterStep(k, c, inst) {
+  const st = $("#dm-stage"), el = document.createElement("article");
+  el.className = "dstep"; el.innerHTML = stepCard(k, c); st.appendChild(el);
+  st.querySelectorAll(".dstep.active").forEach(x => x.classList.remove("active"));
+  markSteps(k);
+  if (k === 3) { const ch = el.querySelector(".chart"); charts.set(ch, c); drawChart(ch, c, true); ro.observe(ch); }
+  if (!inst) await frame();
+  el.classList.add("shown", "active", "go");
+  if (k === 0) typeText(el.querySelector("[data-type]"), c.descricao, Math.min(1600, c.descricao.length * 14));
+  if (k === 1) setTimeout(() => el.querySelector("[data-pop]")?.classList.add("on"), inst ? 0 : 1100);
+  if (k === 3) { el.querySelector(".chart").classList.add("go-band"); countUp(el.querySelector('[data-count="previsto"]'), c.previsto, brl); }
+  if (k === 4) {
+    st.querySelector(".chart")?.classList.add("go-est");
+    const r = el.querySelector('[data-count="ratio"]');
+    const later = (fn, ms) => inst ? fn() : setTimeout(fn, ms);
+    if (r) later(() => countUp(r, c.teto_x, v => times(v), 800), 700);
+    later(() => el.querySelector("[data-pop]")?.classList.add("on"), 1500);
+    el.querySelector("[data-sheet]").onclick = () => openSheet(c);
+  }
+  if (!inst) {
+    const target = k === 4 ? st.querySelectorAll(".dstep")[3] : el;
+    target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }
+}
+async function run(inst = false) {
+  const my = ++token; running = true; setRunLabel();
+  const c = D.casos[sel], st = $("#dm-stage");
+  st.innerHTML = ""; st.classList.toggle("instant", inst);
+  for (let k = 0; k < STEP_DEFS.length; k++) {
+    if (my !== token) return;
+    await enterStep(k, c, inst);
+    if (k < STEP_DEFS.length - 1 && !inst) await wait(STEP_DEFS[k].hold);
+  }
+  if (my !== token) return;
+  markSteps(STEP_DEFS.length - 1); running = false; setRunLabel();
+  if (inst) { await frame(); st.classList.remove("instant"); }
+}
+$("#dm-run").onclick = () => run();
+$("#dm-skip").onclick = () => run(true);
+document.addEventListener("keydown", e => {
+  if (!$("#v-demo").classList.contains("on") || document.body.classList.contains("open")) return;
+  if (e.target.closest("input, textarea")) return;
+  if (e.key === " " || e.key === "ArrowRight") { e.preventDefault(); if (running && skip) skip(); else if (!running) run(); }
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    if (!D) return; e.preventDefault(); sel = (sel + (e.key === "ArrowDown" ? 1 : D.casos.length - 1)) % D.casos.length; markCase(); idle();
+  }
 });
-const num = s => { s = (s || "").trim().replace(/\./g, "").replace(",", "."); return s ? Number(s) : null; };
-$("#form").addEventListener("submit", async e => {
-  e.preventDefault();
-  const err = $("#f-err"), btn = $("#f-go"), out = $("#out");
-  const desc = $("#f-desc").value.trim(), preco = num($("#f-preco").value), qtd = num($("#f-qtd").value);
-  err.textContent = "";
-  if (desc.length < 8) { err.textContent = "Escreva a descrição do item (pelo menos algumas palavras)."; return; }
-  if (preco != null && !(preco > 0)) { err.textContent = "O preço precisa ser um número maior que zero, como 1.250,00."; return; }
-  btn.disabled = true; btn.textContent = "Lendo a descrição…"; out.innerHTML = `<div class="card pad">${skeleton()}</div>`;
-  try {
-    const r = await fetch("/api/analisar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ descricao: desc, preco, quantidade: qtd }) });
-    const it = await r.json();
-    if (!r.ok) throw new Error(it.detail?.[0]?.msg || it.detail || "erro");
-    out.innerHTML = `<div class="card pad" style="background:var(--bg)"><div style="margin-bottom:12px">${badge(it.estado)}</div><div></div></div>`;
-    mountSheet(out.querySelector(".card > div:last-child"), it);
-  } catch (x) {
-    out.innerHTML = `<div class="card emptyc"><div><h3 class="t-mtitle">Não deu para analisar</h3><p class="c2">${esc(x.message)}. Tente de novo em alguns segundos.</p></div></div>`;
-  } finally { btn.disabled = false; btn.textContent = "Analisar"; }
-});
+function openSheet(it) {
+  current = null; lastFocus = document.activeElement;
+  $("#d-badge").innerHTML = badge(it.estado); $("#d-pos").textContent = it.tag || "";
+  mountSheet($("#d-body"), it); $("#d-body").scrollTop = 0; document.body.classList.add("open");
+  setTimeout(() => $("#d-close").focus({ preventScroll: true }), 50);
+}
 
 loadQueue();
 </script>
