@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 from ..features import api_key, cache_key, load_cache, save_cache, state_for, to_features
 from ..model import BUNDLE, MARGIN, feature_matrix, verdict
 from ..questions import QUESTIONS
+from .titles import short_title
 
 ROOT = Path(__file__).resolve().parents[2]
 STATIC = Path(__file__).resolve().parent / "static"
@@ -77,15 +78,28 @@ def readings(f):
     return out
 
 
+def derived(item):
+    """Display fields: short title, spec line, LLM category, ratio to the ceiling."""
+    title, spec = short_title(item["descricao"])
+    f = item["jev"]
+    cats = {k[5:]: v for k, v in f.items() if k.startswith("cat__") and k != "cat__conf"}
+    est, top = item.get("estimado"), item.get("faixa_max")
+    return {"titulo": title, "spec": spec, "categoria": max(cats, key=cats.get),
+            "teto_x": (est / top) if est and top else None}
+
+
 def present(item):
     """Full sheet: the stored item plus readable LLM answers."""
-    return {**{k: v for k, v in item.items() if k != "jev"}, "leituras": readings(item["jev"])}
+    sims = [{**p, "titulo": " · ".join(x for x in short_title(p["descricao"], 48) if x)}
+            for p in item.get("parecidas") or []]
+    return {**{k: v for k, v in item.items() if k not in ("jev", "parecidas")}, **derived(item),
+            "parecidas": sims, "leituras": readings(item["jev"])}
 
 
 def light(item):
     keep = ("id", "descricao", "orgao", "uf", "esfera", "estado", "estimado", "previsto",
             "faixa_min", "faixa_max", "razao", "quantidade", "unidade", "motivos")
-    return {k: item.get(k) for k in keep}
+    return {**{k: item.get(k) for k in keep}, **derived(item)}
 
 
 # ------------------------------------------------------------------ state
@@ -96,6 +110,8 @@ class State:
             b = pickle.load(fh)
         self.model, self.index = b["model"], b["index"]
         self.dev_report, self.holdout_report = b.get("dev_report"), b.get("holdout_report")
+        self.n_train = b.get("n_train")
+        self.updated = os.path.getmtime(QUEUE)
         with open(QUEUE, encoding="utf-8") as fh:
             q = json.load(fh)
         self.items = {it["id"]: it for it in q["items"]}
@@ -151,8 +167,12 @@ def fila():
     items = [light(s.items[i]) for i in s.order]
     counts = pd.Series([it["estado"] for it in items]).value_counts().to_dict()
     tenders = len({s.items[i].get("tender") for i in s.order})
+    paid = s.index.rows
     return {"itens": items, "contagem": counts, "licitacoes": tenders,
-            "dev": s.dev_report, "holdout": s.holdout_report, "margem": MARGIN}
+            "dev": s.dev_report, "holdout": s.holdout_report, "margem": MARGIN,
+            "atualizada": s.updated, "n_treino": s.n_train,
+            "compras_pagas": int(sum(r["n_compras"] for r in paid)),
+            "descricoes_pagas": len(paid)}
 
 
 @app.get("/api/item/{item_id}")
