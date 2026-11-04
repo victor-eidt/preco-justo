@@ -230,6 +230,15 @@ tbody tr[aria-selected="true"] td { background: #f5f8ff; }
 .demo { display: grid; grid-template-columns: 340px 1fr; gap: var(--s4); align-items: start; }
 .dm-side { position: sticky; top: var(--s6); display: flex; flex-direction: column; gap: var(--s4); }
 .dm-cases { display: flex; flex-direction: column; gap: 6px; }
+.lv-form { display: flex; flex-direction: column; gap: var(--s3); padding: 0 4px 4px; }
+.lv-form label { display: flex; flex-direction: column; gap: 6px; }
+.lv-form textarea, .lv-form input { width: 100%; border: 1px solid var(--line-3); border-radius: 10px; background: var(--card); padding: 10px 12px; font: inherit; color: inherit; }
+.lv-form textarea { min-height: 140px; resize: vertical; }
+.lv-form textarea:focus, .lv-form input:focus { outline: none; border-color: var(--info-edge); box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+.lv-form .btn { justify-content: center; }
+.lv-form .btn[disabled] { opacity: .6; pointer-events: none; }
+.lv-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+#lv-msg:empty { display: none; }
 .dm-case { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; text-align: left;
   padding: 10px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--card); cursor: pointer;
   transition: border-color .15s ease, background-color .15s ease, transform .15s ease; }
@@ -331,6 +340,7 @@ tbody tr[aria-selected="true"] td { background: #f5f8ff; }
       <div class="sec t-label"><svg class="i" viewBox="0 0 24 24" stroke-dasharray="2.5 2.5"><circle cx="12" cy="12" r="9"/></svg>Triagem</div>
       <button class="ni" data-view="fila" aria-current="page"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Fila de triagem<span class="ct badge b-info num" id="nav-rev">—</span></button>
       <button class="ni" data-view="demo"><svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg>Demonstração</button>
+      <button class="ni" data-view="vivo"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>Testar ao vivo</button>
     </nav>
     <nav class="nav" aria-label="Fontes de dados">
       <div class="sec t-label"><svg class="i" viewBox="0 0 24 24" stroke-dasharray="2.5 2.5"><circle cx="12" cy="12" r="9"/></svg>Fontes de dados</div>
@@ -407,6 +417,32 @@ tbody tr[aria-selected="true"] td { background: #f5f8ff; }
               <div class="card"><div class="ch"><h2 class="t-mtitle">Passos</h2><span class="t-cap c3">Espaço avança</span></div><ol class="dm-steps" id="dm-steps"></ol></div>
             </aside>
             <div class="dm-stage" id="dm-stage"></div>
+          </div>
+        </div>
+      </section>
+      <section class="view" id="v-vivo">
+        <div class="page">
+          <div class="ph">
+            <div><h1 class="t-title">Testar ao vivo</h1>
+              <p class="c2">Digite qualquer item: o LLM lê a descrição agora e o modelo treinado prevê o preço pago.</p></div>
+          </div>
+          <div class="demo">
+            <aside class="dm-side">
+              <div class="card"><div class="ch"><h2 class="t-mtitle">Seu item</h2><span class="t-cap c3">chamada real ao Jev</span></div>
+                <form class="lv-form" id="lv-form">
+                  <label><span class="t-cap c2">Descrição do item</span>
+                    <textarea id="lv-desc" placeholder="Ex.: Monitor LED 24 polegadas, Full HD, entradas HDMI e DisplayPort" required></textarea></label>
+                  <div class="lv-row">
+                    <label><span class="t-cap c2">Preço estimado (R$)</span><input id="lv-preco" inputmode="decimal" placeholder="1.500,00"></label>
+                    <label><span class="t-cap c2">Quantidade</span><input id="lv-qtd" inputmode="decimal" placeholder="1"></label>
+                  </div>
+                  <button class="btn dark" id="lv-go" type="submit"><svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg><span>Analisar ao vivo</span></button>
+                  <p class="t-cap c3" id="lv-msg"></p>
+                </form>
+              </div>
+            </aside>
+            <div class="dm-stage" id="lv-stage"><div class="card dm-empty"><div><h3 class="t-mtitle">Nenhum item ainda</h3>
+              <p class="c2">Escreva a descrição como num edital e, se quiser, o preço que o órgão estimou. Sem preço, o sistema só prevê.</p></div></div></div>
           </div>
         </div>
       </section>
@@ -644,7 +680,7 @@ document.addEventListener("keydown", e => {
 function go(view) {
   document.querySelectorAll(".ni[data-view]").forEach(n => n.setAttribute("aria-current", n.dataset.view === view ? "page" : "false"));
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + view));
-  $("#crumb").textContent = view === "fila" ? "Fila de triagem" : "Demonstração";
+  $("#crumb").textContent = { fila: "Fila de triagem", demo: "Demonstração", vivo: "Testar ao vivo" }[view];
   if (view === "demo") loadDemo();
   document.querySelector(".search").style.visibility = view === "fila" ? "visible" : "hidden";
   $("#scroll").scrollTop = 0;
@@ -755,8 +791,8 @@ function stepCard(k, c) {
       <span class="t-cap c3">${c.estado === "revisar" ? "Revisão não é acusação: é um pedido para alguém olhar." : c.estado === "ok" ? "Nada a revisar: a estimativa é compatível com o que se paga." : "Abster-se é uma resposta: sem base para comparar, o sistema não arrisca."}</span></div>`;
 }
 
-async function enterStep(k, c, inst) {
-  const st = $("#dm-stage"), el = document.createElement("article");
+async function enterStep(k, c, inst, st = $("#dm-stage")) {
+  const el = document.createElement("article");
   el.className = "dstep"; el.innerHTML = stepCard(k, c); st.appendChild(el);
   st.querySelectorAll(".dstep.active").forEach(x => x.classList.remove("active"));
   markSteps(k);
@@ -802,6 +838,29 @@ document.addEventListener("keydown", e => {
     if (!D) return; e.preventDefault(); sel = (sel + (e.key === "ArrowDown" ? 1 : D.casos.length - 1)) % D.casos.length; markCase(); idle();
   }
 });
+/* --------------------------------------------------------------- live */
+const num = v => { v = (v || "").trim().replace(/[R$\s]/g, ""); if (!v) return null; if (v.includes(",")) v = v.replace(/\./g, "").replace(",", "."); const n = parseFloat(v); return n > 0 ? n : null; };
+$("#lv-form").onsubmit = async e => {
+  e.preventDefault();
+  const desc = $("#lv-desc").value.trim(), btn = $("#lv-go"), st = $("#lv-stage"), msg = $("#lv-msg");
+  if (desc.length < 8) { msg.textContent = "Escreva uma descrição com pelo menos 8 caracteres."; return; }
+  msg.textContent = ""; btn.disabled = true; btn.querySelector("span").textContent = "Analisando…";
+  st.innerHTML = `<div class="card dm-empty"><div><h3 class="t-mtitle">O LLM está lendo a descrição…</h3><p class="c2">Uma chamada ao Jev e o modelo treinado. Leva alguns segundos.</p></div></div>`;
+  try {
+    if (!D) await loadDemo();
+    const r = await fetch("/api/analisar", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ descricao: desc, preco: num($("#lv-preco").value), quantidade: num($("#lv-qtd").value) }) });
+    const c = await r.json();
+    if (!r.ok) throw new Error(typeof c.detail === "string" ? c.detail : "pedido inválido");
+    Object.assign(c, { demo_id: "live", tag: "Ao vivo" });
+    st.innerHTML = ""; st.classList.add("instant");
+    for (let k = 0; k < STEP_DEFS.length; k++) if (c.estimado || k < 4) await enterStep(k, c, true, st);
+    await frame(); st.classList.remove("instant");
+  } catch (err) {
+    st.innerHTML = `<div class="card dm-empty"><div><h3 class="t-mtitle">Não deu certo</h3><p class="c2">${esc(err.message)}</p></div></div>`;
+  } finally { btn.disabled = false; btn.querySelector("span").textContent = "Analisar ao vivo"; }
+};
+
 function openSheet(it) {
   current = null; lastFocus = document.activeElement;
   $("#d-badge").innerHTML = badge(it.estado); $("#d-pos").textContent = it.tag || "";
