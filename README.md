@@ -173,7 +173,18 @@ anomaly queue only needs the second. Full log in
 - Separate original from compatible supplies in the paid data (the toner
   false positives).
 - Item-level data for medicines and fuels.
-- Bias audit by government sphere and municipality size.
+- Bias audit by municipality size (the audit by government sphere is done,
+  see below).
+
+## Ethics
+
+Who bears the errors, the LGPD, what reaches the external LLM, and a bias
+audit by government sphere, in [docs/ethics.md](docs/ethics.md). In short:
+supplier names are dropped at ingestion and the LLM sees only the item. The
+system flags only above the range and abstains when it has no basis to judge.
+Its bias shows up as blindness rather than suspicion: it judges 4% of
+municipal items against 26% of federal ones, while the flag rate among judged
+items is about the same in every sphere (17 to 20%).
 
 ## Run it
 
@@ -199,6 +210,7 @@ python -m precojusto.items train-set          # clean + aggregate paid prices
 python -m precojusto.features --input data/items/train.jsonl --output data/items/features.jsonl
 python -m precojusto.model train              # both neighbour regimes, dev CV
 python -m precojusto.model queue              # batch: PNCP items -> queue.json
+python -m precojusto.model bias               # ethics: judged/flagged rate by sphere
 python -m precojusto.app                      # http://127.0.0.1:8000
 ```
 
@@ -214,7 +226,7 @@ data/pilot/         682 tenders + features + recorded pilot results (committed)
 data/items/         item-level features, paid-price index, audit features, results
 data/raw/           crawls and the LLM cache (gitignored, regenerable)
 docs/               architecture, decision records, experiment log, API notes,
-                    interface plan
+                    interface plan, ethics and limitations
 docs/proposal-deck/ the 12-slide proposal (pt-BR)
 ```
 

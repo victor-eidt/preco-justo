@@ -26,6 +26,7 @@ Usage::
     python -m precojusto.model train            # dev only; holdout untouched
     python -m precojusto.model final            # score the holdout, ONCE
     python -m precojusto.model queue            # batch: audit items -> queue.json
+    python -m precojusto.model bias             # ethics: judged/flagged rate by sphere
 """
 
 import argparse
@@ -390,9 +391,56 @@ def cmd_queue(features, bundle_path, out):
     _log(f"WROTE {out}: {len(items)} items · {counts}")
 
 
+SPHERES = {"F": "federal", "E": "estadual", "M": "municipal", "D": "distrital",
+           "N": "não se aplica"}
+
+
+def bias_table(items):
+    """Per government sphere: how often the system judges, and how often it flags.
+
+    Two rates, because the risk runs two ways. A higher flag rate among judged
+    items would put suspicion on one kind of buyer; a lower judged rate means
+    the system is blind to that buyer and protects nobody there.
+    """
+    df = pd.DataFrame({"esfera": [it.get("esfera") or "?" for it in items],
+                       "estado": [it["estado"] for it in items],
+                       "motivo": [(it.get("motivos") or [None])[0] for it in items]})
+    rows = []
+    for code, g in df.groupby("esfera"):
+        judged = g[g.estado != "sem_confianca"]
+        rows.append({"esfera": SPHERES.get(code, code), "itens": len(g),
+                     "julgados": len(judged), "pct_julgados": len(judged) / len(g),
+                     "revisar": int((g.estado == "revisar").sum()),
+                     "pct_revisar_dos_julgados": ((judged.estado == "revisar").mean()
+                                                  if len(judged) else float("nan")),
+                     # share of the sphere's items with no paid purchase like them:
+                     # the training data's blind spot, not the buyer's fault
+                     "pct_sem_compra_parecida": g.motivo.fillna("").str.startswith(
+                         "não há compra parecida").mean()})
+    return pd.DataFrame(rows).sort_values("itens", ascending=False)
+
+
+def cmd_bias(queue_path, index_path, out_csv):
+    """Ethics check: judged and flagged rates by sphere, on the audit queue."""
+    with open(queue_path, encoding="utf-8") as fh:
+        items = json.load(fh)["items"]
+    t = bias_table(items)
+    t.to_csv(out_csv, index=False)
+    with pd.option_context("display.width", 160, "display.max_colwidth", 60):
+        _log(t.to_string(index=False))
+    paid = pd.Series([r.get("ex_esfera") for r in load_index(index_path).rows]).value_counts()
+    _log("paid descriptions by sphere (what the model learned from): "
+         + ", ".join(f"{SPHERES.get(k, k)} {v / paid.sum():.0%}" for k, v in paid.items()))
+    flagged = pd.Series([it.get("tender") for it in items if it["estado"] == "revisar"])
+    top = flagged.value_counts()
+    _log(f"{len(flagged)} flags in {flagged.nunique()} tenders; the top 3 tenders hold "
+         f"{top.head(3).sum()}")
+    _log(f"WROTE {out_csv}")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Train, evaluate and batch-score the price model.")
-    ap.add_argument("cmd", choices=["train", "final", "queue"])
+    ap.add_argument("cmd", choices=["train", "final", "queue", "bias"])
     ap.add_argument("--features", default=None)
     ap.add_argument("--index", default="data/items/paid_index.jsonl")
     ap.add_argument("--bundle", default=BUNDLE)
@@ -403,9 +451,11 @@ def main(argv=None):
     elif a.cmd == "final":
         cmd_final(a.features or "data/items/features.jsonl", a.bundle,
                   a.out or "data/items/results_final.csv")
-    else:
+    elif a.cmd == "queue":
         cmd_queue(a.features or "data/items/audit_features.jsonl", a.bundle,
                   a.out or "data/items/queue.json")
+    else:
+        cmd_bias("data/items/queue.json", a.index, a.out or "data/items/results_bias.csv")
 
 
 if __name__ == "__main__":
