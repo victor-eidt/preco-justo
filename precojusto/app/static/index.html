@@ -664,7 +664,8 @@ const STEP_DEFS = [
   { t: "O modelo prevê o preço pago", sub: () => "Gradient boosting sobre as respostas do LLM. A faixa contém 80% dos preços pagos.", hold: 2800 },
   { t: "Compara com a estimativa", sub: () => `Revisão só quando a estimativa passa ${String(D.margem).replace(".", ",")}× do teto da faixa.`, hold: 0 },
 ];
-const wait = ms => new Promise(r => { const t = setTimeout(r, ms); skip = () => { clearTimeout(t); r(); }; });
+// manual: each step waits for Space or → (the presenter paces the demo)
+const wait = () => new Promise(r => { skip = () => { skip = null; r(); }; });
 const frame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 function countUp(el, to, fmt, ms = 900) {
   if (reduce || el.closest(".instant")) { el.textContent = fmt(to); return; }
