@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preço Justo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23141413'/%3E%3Crect x='7' y='13' width='18' height='6' rx='2' fill='%23d6e2f8'/%3E%3Crect x='14' y='9' width='3' height='14' rx='1.5' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* spacing: 4 8 12 16 24 32 48 64 */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+  /* type: 12 13 14 16 20 24 32 */
+  --t-xs: 12px; --t-sm: 13px; --t-md: 14px; --t-base: 16px; --t-lg: 20px; --t-xl: 24px; --t-2xl: 32px;
+
+  --bg: #f5f5f2;
+  --surface: #ffffff;
+  --sunken: #f0efeb;
+  --ink: #141413;
+  --ink-2: #57564f;
+  --ink-3: #8a8983;
+  --line: rgba(11, 11, 11, 0.08);
+  --line-2: rgba(11, 11, 11, 0.14);
+  --axis: #c3c2b7;
+  --accent: #1d4ed8;
+  --accent-ink: #1e3a8a;
+  --band: #d6e2f8;
+  --band-edge: #9db6e6;
+  --shadow: 0 0 0 1px rgba(11, 11, 11, 0.05), 0 1px 2px rgba(11, 11, 11, 0.04), 0 4px 12px rgba(11, 11, 11, 0.04);
+
+  --rev: #fab219;  --rev-tint: #fff3d4;  --rev-ink: #6b4700;
+  --ok: #0ca30c;   --ok-tint: #e4f4e4;   --ok-ink: #0b5a0b;
+  --low: #64748b;  --low-tint: #eceff4;  --low-ink: #334155;
+  --nc: #9a9890;   --nc-tint: #efeeea;   --nc-ink: #57564f;
+
+  --r: 12px; --r-in: 8px;
+  --font: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font);
+  font-size: var(--t-md); line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+.num { font-variant-numeric: tabular-nums; }
+button { font: inherit; color: inherit; }
+
+/* ---------------------------------------------------------------- top */
+.top {
+  height: 56px; display: flex; align-items: center; gap: var(--s6);
+  padding: 0 var(--s5); background: var(--surface); box-shadow: 0 1px 0 var(--line);
+  position: relative; z-index: 2;
+}
+.brand { display: flex; align-items: baseline; gap: var(--s3); }
+.brand b { font-size: var(--t-base); font-weight: 700; letter-spacing: -0.01em; }
+.brand span { font-size: var(--t-sm); color: var(--ink-3); }
+.tabs { display: flex; gap: var(--s1); height: 100%; }
+.tab {
+  border: 0; background: none; padding: 0 var(--s3); height: 100%; cursor: pointer;
+  font-size: var(--t-md); font-weight: 500; color: var(--ink-2);
+  box-shadow: inset 0 -2px 0 transparent; transition: color .15s, box-shadow .15s;
+}
+.tab[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 6px; }
+.src { margin-left: auto; font-size: var(--t-xs); color: var(--ink-3); }
+
+/* ------------------------------------------------------------- layout */
+.view { display: none; height: calc(100vh - 56px); }
+.view.on { display: grid; grid-template-columns: minmax(380px, 44fr) 56fr; }
+.pane-l { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); }
+.pane-r { overflow-y: auto; padding: var(--s5); min-width: 0; }
+
+/* ------------------------------------------------------------- queue */
+.qhead { padding: var(--s5) var(--s5) var(--s4); }
+.kpi { display: flex; align-items: baseline; gap: var(--s3); flex-wrap: wrap; }
+.kpi .big { font-size: var(--t-2xl); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+.kpi .lbl { font-size: var(--t-base); font-weight: 600; }
+.kpi-sub { margin-top: var(--s2); color: var(--ink-2); font-size: var(--t-sm); }
+.filters { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s4); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 var(--s3);
+  border-radius: 999px; border: 0; background: var(--surface); box-shadow: 0 0 0 1px var(--line-2);
+  font-size: var(--t-sm); font-weight: 500; color: var(--ink-2); cursor: pointer;
+  transition: background .15s, box-shadow .15s, transform .15s;
+}
+.chip:active { transform: scale(.97); }
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chip .n { color: inherit; opacity: .7; font-variant-numeric: tabular-nums; }
+@media (hover: hover) and (pointer: fine) { .chip[aria-pressed="false"]:hover { background: var(--sunken); } }
+
+.list { overflow-y: auto; flex: 1; padding: 0 var(--s3) var(--s5); }
+.row {
+  display: grid; grid-template-columns: 1fr auto; gap: var(--s2) var(--s4); width: 100%;
+  text-align: left; border: 0; background: none; padding: var(--s3); border-radius: var(--r-in);
+  cursor: pointer; transition: background .12s;
+}
+.row + .row { margin-top: 2px; }
+@media (hover: hover) and (pointer: fine) { .row:hover { background: rgba(11,11,11,.035); } }
+.row[aria-current="true"] { background: var(--surface); box-shadow: var(--shadow); }
+.row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.row .d {
+  font-size: var(--t-md); font-weight: 500; line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.row .m { grid-column: 1; font-size: var(--t-xs); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .p { grid-row: 1 / span 2; grid-column: 2; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: var(--s1); }
+.row .p .e { font-weight: 600; font-variant-numeric: tabular-nums; }
+.row .p .x { font-size: var(--t-xs); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.more { display: block; margin: var(--s3) auto 0; }
+
+/* -------------------------------------------------------------- badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px;
+  border-radius: 999px; font-size: var(--t-xs); font-weight: 600; white-space: nowrap;
+}
+.badge svg { width: 14px; height: 14px; flex: none; }
+.badge.revisar { background: var(--rev-tint); color: var(--rev-ink); }
+.badge.revisar svg { color: #c98a00; }
+.badge.ok { background: var(--ok-tint); color: var(--ok-ink); }
+.badge.abaixo { background: var(--low-tint); color: var(--low-ink); }
+.badge.sem_confianca { background: var(--nc-tint); color: var(--nc-ink); box-shadow: inset 0 0 0 1px rgba(11,11,11,.08); }
+.badge.lg { height: 32px; padding: 0 var(--s3) 0 10px; font-size: var(--t-sm); }
+.badge.lg svg { width: 16px; height: 16px; }
+
+/* -------------------------------------------------------------- sheet */
+.sheet { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--s4); }
+.verdict { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.verdict .why { color: var(--ink-2); font-size: var(--t-md); }
+.title {
+  margin: var(--s2) 0 0; font-size: var(--t-lg); font-weight: 600; line-height: 1.3;
+  letter-spacing: -0.01em; text-wrap: pretty;
+}
+.title.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.link { border: 0; background: none; padding: 0; color: var(--accent); font-size: var(--t-sm); cursor: pointer; }
+.link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.meta { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); margin-top: var(--s2); font-size: var(--t-sm); color: var(--ink-2); }
+.meta span + span::before { content: "·"; margin-right: var(--s3); color: var(--ink-3); }
+.obj { margin-top: var(--s2); font-size: var(--t-xs); color: var(--ink-3); max-width: 75ch;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.prices.muted .v { color: var(--ink-3); }
+.abstain { margin-top: var(--s3); font-size: var(--t-sm); color: var(--ink-2); }
+
+.card { background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow); padding: var(--s5); }
+.card h3 { margin: 0; font-size: var(--t-sm); font-weight: 600; color: var(--ink-2); letter-spacing: .01em; }
+.card .hint { margin: var(--s1) 0 0; font-size: var(--t-xs); color: var(--ink-3); }
+
+.prices { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); margin-top: var(--s4); }
+.price .k { font-size: var(--t-xs); color: var(--ink-3); }
+.price .v { font-size: var(--t-xl); font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.2; margin-top: 2px; }
+.price .v.sm { font-size: var(--t-base); font-weight: 600; margin-top: 6px; }
+.price .c { font-size: var(--t-xs); color: var(--ink-2); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+.chart { margin-top: var(--s5); position: relative; }
+.chart { height: 84px; }
+.chart svg { display: block; overflow: visible; }
+.chart text { font-family: var(--font); font-size: 12px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.chart .tick text { fill: var(--ink-3); font-size: 11px; }
+.legend { display: flex; gap: var(--s4); flex-wrap: wrap; margin-top: var(--s3); font-size: var(--t-xs); color: var(--ink-2); }
+.legend i { display: inline-block; vertical-align: -2px; margin-right: 6px; }
+.direct {
+  margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: var(--r-in); background: var(--sunken);
+  font-size: var(--t-sm); color: var(--ink-2); display: flex; justify-content: space-between; gap: var(--s4);
+}
+.direct b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.tip {
+  position: absolute; pointer-events: none; background: var(--ink); color: #fff; font-size: var(--t-xs);
+  padding: 6px 8px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -100%);
+  opacity: 0; transition: opacity .1s; font-variant-numeric: tabular-nums;
+}
+
+.reads { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3) var(--s5); margin-top: var(--s4); }
+.read .top2 { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--t-sm); }
+.read .top2 .l { color: var(--ink-2); }
+.read .top2 .v { font-weight: 600; text-align: right; }
+.meter { height: 4px; border-radius: 2px; background: var(--sunken); margin-top: 6px; overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+
+.sims { margin-top: var(--s3); }
+.sim { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s4); padding: var(--s3) 0; }
+.sim + .sim { box-shadow: 0 -1px 0 var(--line); }
+.sim .d { font-size: var(--t-sm); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim .w { font-size: var(--t-xs); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim .p { grid-row: 1 / span 2; grid-column: 2; text-align: right; }
+.sim .p b { display: block; font-variant-numeric: tabular-nums; font-weight: 600; }
+.sim .p span { font-size: var(--t-xs); color: var(--ink-3); }
+
+.empty { height: 100%; display: grid; place-items: center; text-align: center; color: var(--ink-2); padding: var(--s7); }
+.empty h2 { margin: 0 0 var(--s2); font-size: var(--t-lg); color: var(--ink); }
+.empty p { margin: 0 auto; max-width: 46ch; font-size: var(--t-md); }
+
+/* ------------------------------------------------------------ analyze */
+.form { padding: var(--s5); display: flex; flex-direction: column; gap: var(--s4); overflow-y: auto; }
+.form h1 { margin: 0; font-size: var(--t-xl); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+.form .lede { margin: var(--s2) 0 0; color: var(--ink-2); font-size: var(--t-md); max-width: 52ch; }
+.field label { display: block; font-size: var(--t-sm); font-weight: 600; margin-bottom: 6px; }
+.field .opt { font-weight: 400; color: var(--ink-3); }
+textarea, input {
+  width: 100%; font: inherit; font-size: var(--t-base); color: var(--ink); background: var(--surface);
+  border: 0; border-radius: var(--r-in); box-shadow: 0 0 0 1px var(--line-2); padding: 10px var(--s3);
+  transition: box-shadow .15s;
+}
+textarea { min-height: 132px; resize: vertical; line-height: 1.45; }
+textarea:focus, input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+.money { position: relative; }
+.money span { position: absolute; left: var(--s3); top: 50%; transform: translateY(-50%); color: var(--ink-3); font-size: var(--t-base); }
+.money input { padding-left: 38px; }
+.err { color: #9a2a2a; font-size: var(--t-sm); min-height: 20px; }
+.btn {
+  height: 44px; border: 0; border-radius: var(--r-in); background: var(--ink); color: #fff; font-weight: 600;
+  font-size: var(--t-md); cursor: pointer; transition: transform .15s, opacity .15s;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .5; cursor: progress; }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ex h4 { margin: 0 0 var(--s2); font-size: var(--t-sm); font-weight: 600; color: var(--ink-2); }
+.ex .chips { display: flex; flex-direction: column; gap: var(--s2); }
+.exb {
+  text-align: left; border: 0; background: var(--surface); box-shadow: 0 0 0 1px var(--line); border-radius: var(--r-in);
+  padding: 10px var(--s3); cursor: pointer; font-size: var(--t-sm); color: var(--ink-2); transition: background .12s, transform .15s;
+}
+.exb b { color: var(--ink); font-weight: 600; }
+.exb:active { transform: scale(.99); }
+@media (hover: hover) and (pointer: fine) { .exb:hover { background: var(--sunken); } }
+.exb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* skeleton mirrors the sheet */
+.sk { background: linear-gradient(90deg, var(--sunken), #f7f7f4, var(--sunken)); background-size: 200% 100%; animation: sh 1.2s linear infinite; border-radius: 6px; }
+@keyframes sh { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } * { transition: none !important; } }
+
+.foot { font-size: var(--t-xs); color: var(--ink-3); max-width: 75ch; }
+
+@media (max-width: 900px) {
+  .view.on { grid-template-columns: 1fr; height: auto; }
+  .pane-l { border-right: 0; max-height: 60vh; }
+  .prices, .reads { grid-template-columns: 1fr; }
+  .src, .brand span { display: none; }
+  .top { gap: var(--s4); padding: 0 var(--s4); }
+  .tab { padding: 0 var(--s2); }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><b>Preço Justo</b><span>triagem de preços em compras públicas de TI</span></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-view="fila">Fila de triagem</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="analisar">Analisar um item</button>
+  </nav>
+  <div class="src">Estimativas: PNCP · Preços pagos: Compras.gov.br</div>
+</header>
+
+<main>
+  <section class="view on" id="v-fila">
+    <div class="pane-l">
+      <div class="qhead">
+        <div class="kpi"><span class="big num" id="k-rev">—</span><span class="lbl">itens precisam de revisão</span></div>
+        <div class="kpi-sub" id="k-sub">carregando a fila…</div>
+        <div class="filters" id="filters"></div>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+    <div class="pane-r" id="sheet-fila"></div>
+  </section>
+
+  <section class="view" id="v-analisar">
+    <div class="pane-l">
+      <form class="form" id="form" novalidate>
+        <div>
+          <h1>Analisar um item</h1>
+          <p class="lede">Cole a descrição de um item de edital e o preço que o órgão estimou. O LLM lê a descrição, o modelo prevê quanto se costuma pagar, e o sistema diz se a estimativa merece revisão.</p>
+        </div>
+        <div class="field">
+          <label for="f-desc">Descrição do item</label>
+          <textarea id="f-desc" placeholder="Ex.: Notebook Core i5, 16 GB de RAM, SSD 512 GB, tela 15,6 polegadas, garantia de 36 meses"></textarea>
+        </div>
+        <div class="two">
+          <div class="field">
+            <label for="f-preco">Preço unitário estimado</label>
+            <div class="money"><span>R$</span><input id="f-preco" inputmode="decimal" autocomplete="off" placeholder="0,00"></div>
+          </div>
+          <div class="field">
+            <label for="f-qtd">Quantidade <span class="opt">(opcional)</span></label>
+            <input id="f-qtd" inputmode="numeric" autocomplete="off" placeholder="1">
+          </div>
+        </div>
+        <div class="err" id="f-err" role="alert"></div>
+        <button class="btn" id="f-go" type="submit">Analisar</button>
+        <div class="ex">
+          <h4>Ou comece por um exemplo</h4>
+          <div class="chips" id="examples"></div>
+        </div>
+      </form>
+    </div>
+    <div class="pane-r" id="sheet-analisar">
+      <div class="empty"><div>
+        <h2>A ficha do item aparece aqui</h2>
+        <p>Preço previsto com a faixa de incerteza, como o LLM leu a descrição e as compras parecidas que o governo já pagou.</p>
+      </div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const STATES = {
+  revisar:       { label: "Precisa de revisão",       chip: "Revisão" },
+  abaixo:        { label: "Abaixo da faixa",          chip: "Abaixo da faixa" },
+  ok:            { label: "Dentro do esperado",       chip: "No esperado" },
+  sem_confianca: { label: "Sem confiança suficiente", chip: "Sem confiança" },
+};
+const ICONS = {
+  revisar: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="8" cy="8" r="6.25"/><path d="M8 4.75v3.75M8 11.1v.15"/></svg>',
+  ok: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.25"/><path d="M5.4 8.2l1.8 1.8 3.4-3.6"/></svg>',
+  abaixo: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.25"/><path d="M8 4.9v6M5.6 8.6L8 10.9l2.4-2.3"/></svg>',
+  sem_confianca: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="8" cy="8" r="6.25" stroke-dasharray="2.4 2.2"/><path d="M5.5 8h5"/></svg>',
+};
+const ESFERA = { F: "federal", E: "estadual", M: "municipal", D: "distrital" };
+const ORDER = ["revisar", "abaixo", "ok", "sem_confianca"];
+
+const brl = v => v == null ? "—" : v.toLocaleString("pt-BR", {
+  style: "currency", currency: "BRL",
+  minimumFractionDigits: v < 100 ? 2 : 0, maximumFractionDigits: v < 100 ? 2 : 0 });
+const times = r => r == null ? "" : (r >= 10 ? r.toFixed(0) : r.toFixed(1)).replace(".", ",") + "×";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const badge = (st, lg) => `<span class="badge ${st}${lg ? " lg" : ""}">${ICONS[st]}${STATES[st].label}</span>`;
+
+function ratioText(it) {
+  if (it.razao == null) return "";
+  if (it.razao >= 1) return `${times(it.razao)} o previsto`;
+  return `${times(1 / it.razao)} abaixo do previsto`;
+}
+
+/* ----------------------------------------------------------- chart */
+function rangeChart(it) {
+  return `<div class="chart" data-tip></div>
+  <div class="legend">
+    <span><i style="width:16px;height:10px;border-radius:3px;background:var(--band);box-shadow:inset 0 0 0 1px var(--band-edge)"></i>Faixa onde caem 80% dos preços pagos</span>
+    <span><i style="width:3px;height:12px;border-radius:2px;background:var(--accent-ink)"></i>Previsto</span>
+    ${it.estimado ? `<span><i style="width:10px;height:10px;border-radius:50%;background:${statusColor(it)}"></i>Estimado pelo órgão</span>` : ""}
+  </div>`;
+}
+const statusColor = it => ({ revisar: "#e0a000", ok: "var(--ok)", abaixo: "var(--low)", sem_confianca: "var(--nc)" }[it.estado]);
+
+function drawChart(ch, it) {
+  const pts = [it.faixa_min, it.faixa_max, it.previsto, it.estimado].filter(v => v > 0);
+  let lo = Math.log10(Math.min(...pts)), hi = Math.log10(Math.max(...pts));
+  const pad = Math.max(0.25, (hi - lo) * 0.12);
+  lo -= pad; hi += pad;
+  const W = Math.max(280, ch.clientWidth), L = 8, R = 8, y0 = 46;
+  const x = v => L + (Math.log10(v) - lo) / (hi - lo) * (W - L - R);
+
+  const ticks = [];
+  for (let e = Math.floor(lo); e <= Math.ceil(hi); e++)
+    for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (Math.log10(v) >= lo && Math.log10(v) <= hi) ticks.push(v); }
+  const short = v => v >= 1e6 ? `${v / 1e6} mi` : v >= 1e3 ? `${v / 1e3} mil` : `${v}`;
+
+  const bx = x(it.faixa_min), bw = Math.max(6, x(it.faixa_max) - bx), px = x(it.previsto);
+  const est = it.estimado ? x(it.estimado) : null;
+  const stColor = statusColor(it);
+  // thin out tick labels that would collide (~56px each)
+  let last = -1e9; const keep = ticks.filter(v => { const ok = x(v) - last >= 60; if (ok) last = x(v); return ok; });
+  const tickSvg2 = keep.map(v => `<g class="tick"><line x1="${x(v)}" x2="${x(v)}" y1="${y0 + 14}" y2="${y0 + 18}" stroke="var(--axis)"/>
+    <text x="${x(v)}" y="${y0 + 32}" text-anchor="middle">R$ ${short(v)}</text></g>`).join("");
+  ch.innerHTML = `
+    <svg viewBox="0 0 ${W} 84" width="${W}" height="84" role="img"
+      aria-label="Faixa prevista de ${brl(it.faixa_min)} a ${brl(it.faixa_max)}, previsto ${brl(it.previsto)}${it.estimado ? `, estimado ${brl(it.estimado)}` : ""}">
+      <line x1="${L}" x2="${W - R}" y1="${y0 + 14}" y2="${y0 + 14}" stroke="var(--axis)"/>
+      ${tickSvg2}
+      <rect class="hit" data-t="Faixa de 80%: ${brl(it.faixa_min)} a ${brl(it.faixa_max)}" x="${bx}" y="${y0 - 12}" width="${bw}" height="24" rx="4"
+        fill="var(--band)" stroke="var(--band-edge)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+      <rect class="hit" data-t="Previsto (preço pago): ${brl(it.previsto)}" x="${px - 1.5}" y="${y0 - 18}" width="3" height="36" rx="1.5" fill="var(--accent-ink)"/>
+      ${est != null ? `<g class="hit" data-t="Estimado pelo órgão: ${brl(it.estimado)}">
+        <rect x="${est - 8}" y="${y0 - 34}" width="16" height="48" fill="transparent"/>
+        <line x1="${est}" x2="${est}" y1="${y0 - 22}" y2="${y0 + 12}" stroke="${stColor}" stroke-width="2"/>
+        <circle cx="${est}" cy="${y0 - 24}" r="6" fill="${stColor}" stroke="var(--surface)" stroke-width="2"/>
+      </g>` : ""}
+    </svg>
+    <div class="tip"></div>`;
+  wireTips(ch.parentNode);
+}
+
+function wireTips(root) {
+  root.querySelectorAll("[data-tip]").forEach(ch => {
+    const tip = ch.querySelector(".tip");
+    ch.querySelectorAll(".hit").forEach(el => {
+      el.addEventListener("mousemove", e => {
+        const r = ch.getBoundingClientRect();
+        tip.textContent = el.dataset.t; tip.style.left = (e.clientX - r.left) + "px"; tip.style.top = (e.clientY - r.top - 10) + "px"; tip.style.opacity = 1;
+      });
+      el.addEventListener("mouseleave", () => tip.style.opacity = 0);
+    });
+  });
+}
+
+/* ----------------------------------------------------------- sheet */
+function sheet(it, opts = {}) {
+  const judged = it.estado !== "sem_confianca";
+  const why = it.motivos?.length ? it.motivos.join("; ") : (it.estimado ? "a estimativa cai na faixa dos preços pagos" : "");
+  const meta = [
+    it.orgao && esc(titleCase(it.orgao)),
+    it.uf && esc(it.uf),
+    it.esfera && ESFERA[it.esfera],
+    it.quantidade && `${fmtQty(it.quantidade)} ${esc(it.unidade || "")}`.trim(),
+  ].filter(Boolean).map(s => `<span>${s}</span>`).join("");
+  const long = (it.descricao || "").length > 240;
+  const reads = it.leituras.map(r => `<div class="read">
+      <div class="top2"><span class="l">${esc(r.rotulo)}</span><span class="v">${esc(r.valor)}</span></div>
+      <div class="meter"><i style="width:${Math.max(2, Math.round(r.nivel * 100))}%"></i></div></div>`).join("");
+  const sims = (it.parecidas || []).map(s => `<div class="sim">
+      <div class="d" title="${esc(s.descricao)}">${esc(s.descricao)}</div>
+      <div class="w">${s.n_compras} compras · ex.: ${esc(titleCase(s.orgao || ""))}${s.uf ? ", " + esc(s.uf) : ""}${s.data ? " · " + s.data.slice(0, 4) : ""}</div>
+      <div class="p"><b>${brl(s.mediana)}</b><span>mediana paga</span></div></div>`).join("")
+    || `<p class="hint">Nenhuma compra com descrição parecida o bastante.</p>`;
+
+  return `<div class="sheet">
+    <div>
+      <div class="verdict">${badge(it.estado, true)}<span class="why">${esc(cap(why))}</span></div>
+      <h2 class="title${long ? " clamp" : ""}" id="ttl">${esc(it.descricao)}</h2>
+      ${long ? `<button class="link" id="ttl-more">ver descrição completa</button>` : ""}
+      ${meta ? `<div class="meta">${meta}</div>` : ""}
+      ${it.objeto ? `<div class="obj">Licitação: ${esc(cap(it.objeto.replace(/^\[[^\]]*\]\s*-\s*/, "")))}</div>` : ""}
+    </div>
+
+    <div class="card">
+      <h3>Preço unitário</h3>
+      ${judged ? "" : `<p class="abstain">O sistema não julga este item. A previsão aparece só por transparência.</p>`}
+      <div class="prices${judged ? "" : " muted"}">
+        <div class="price"><div class="k">Estimado pelo órgão</div><div class="v">${brl(it.estimado)}</div>
+          <div class="c">${judged ? esc(ratioText(it)) : "&nbsp;"}</div></div>
+        <div class="price"><div class="k">Previsto (quanto se costuma pagar)</div><div class="v">${brl(it.previsto)}</div>
+          <div class="c">mediana prevista pelo modelo</div></div>
+        <div class="price"><div class="k">Faixa de 80%</div><div class="v sm">${brl(it.faixa_min)} – ${brl(it.faixa_max)}</div>
+          <div class="c">${times(it.faixa_max / it.faixa_min)} de largura</div></div>
+      </div>
+      ${rangeChart(it)}
+      <div class="direct"><span>Se perguntássemos o preço direto ao LLM, sem modelo treinado</span><b>${brl(it.llm_direto)}</b></div>
+    </div>
+
+    <div class="card">
+      <h3>Como o LLM leu a descrição</h3>
+      <p class="hint">Respostas tipadas do Jev. Estas leituras, não o texto, são o que o modelo usa para prever o preço.</p>
+      <div class="reads">${reads}</div>
+    </div>
+
+    <div class="card">
+      <h3>Compras parecidas que o governo já pagou</h3>
+      <p class="hint">Compras.gov.br, 2024–2026, busca por descrição parecida. Fornecedores não são exibidos.</p>
+      <div class="sims">${sims}</div>
+    </div>
+
+    <p class="foot">A faixa foi calibrada em itens de catálogo que o modelo nunca viu: 80% dos preços pagos caem dentro dela. O preço pago sai de um pregão e a estimativa entra antes dele, então estimativas tendem a ficar acima; por isso só marcamos revisão quando a estimativa passa ${String(window.MARGEM || 1.5).replace(".", ",")}× do teto da faixa. Revisão não é acusação: é um pedido para alguém olhar.</p>
+  </div>`;
+}
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+const fmtQty = q => Number(q).toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+function titleCase(s) {
+  const small = new Set(["de", "da", "do", "das", "dos", "e", "a", "o"]);
+  return s.toLowerCase().split(/\s+/).map((w, i) => (i && small.has(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+const charts = new Map();
+const ro = new ResizeObserver(es => es.forEach(e => { const it = charts.get(e.target); if (it) drawChart(e.target, it); }));
+function mount(el, html, it) {
+  el.innerHTML = html; el.scrollTop = 0;
+  const ch = el.querySelector(".chart");
+  if (ch && it) { charts.set(ch, it); drawChart(ch, it); ro.observe(ch); }
+  const more = el.querySelector("#ttl-more");
+  if (more) more.onclick = () => { el.querySelector("#ttl").classList.remove("clamp"); more.remove(); };
+}
+function skeleton() {
+  const bar = (w, h = 14) => `<div class="sk" style="width:${w};height:${h}px"></div>`;
+  return `<div class="sheet">
+    <div style="display:flex;flex-direction:column;gap:12px">${bar("180px", 32)}${bar("90%", 22)}${bar("60%", 22)}</div>
+    <div class="card"><h3>Preço unitário</h3><div class="prices">${[0, 1, 2].map(() => `<div>${bar("70%", 12)}<div style="height:8px"></div>${bar("80%", 28)}</div>`).join("")}</div>
+      <div style="height:24px"></div>${bar("100%", 48)}</div>
+    <div class="card"><h3>Como o LLM leu a descrição</h3><div class="reads">${Array(8).fill(`<div>${bar("100%", 12)}<div style="height:8px"></div>${bar("100%", 4)}</div>`).join("")}</div></div>
+    <div class="card"><h3>Compras parecidas que o governo já pagou</h3>${Array(3).fill(`<div style="padding:12px 0">${bar("85%", 14)}<div style="height:6px"></div>${bar("50%", 12)}</div>`).join("")}</div>
+  </div>`;
+}
+
+/* ----------------------------------------------------------- queue */
+let Q = null, filter = "revisar", current = null, shown = 60;
+const listEl = document.getElementById("list"), sheetFila = document.getElementById("sheet-fila");
+
+async function loadQueue() {
+  const r = await fetch("/api/fila"); Q = await r.json(); window.MARGEM = Q.margem;
+  const c = Q.contagem, total = Q.itens.length;
+  document.getElementById("k-rev").textContent = (c.revisar || 0).toLocaleString("pt-BR");
+  document.getElementById("k-sub").textContent =
+    `de ${total.toLocaleString("pt-BR")} itens lidos em ${Q.licitacoes.toLocaleString("pt-BR")} licitações de TI · ` +
+    `${(c.sem_confianca || 0).toLocaleString("pt-BR")} sem confiança suficiente para julgar`;
+  if (!c[filter]) filter = ORDER.find(s => c[s]) || filter;
+  document.getElementById("filters").innerHTML = ORDER.filter(s => c[s]).map(s =>
+    `<button class="chip" data-f="${s}" aria-pressed="${s === filter}">${STATES[s].chip} <span class="n">${(c[s] || 0).toLocaleString("pt-BR")}</span></button>`).join("");
+  document.querySelectorAll(".chip").forEach(b => b.onclick = () => { filter = b.dataset.f; shown = 60; renderList(true); });
+  renderList(true);
+}
+function renderList(selectFirst) {
+  document.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === filter));
+  const rows = Q.itens.filter(it => it.estado === filter);
+  listEl.innerHTML = rows.slice(0, shown).map(it => `<button class="row" data-id="${it.id}" aria-current="${it.id === current}">
+      <span class="d">${esc(it.descricao)}</span>
+      <span class="m">${esc(titleCase(it.orgao || ""))}${it.uf ? " · " + esc(it.uf) : ""}</span>
+      <span class="p"><span class="e">${brl(it.estimado)}</span>${filter === "sem_confianca" ? badge(it.estado) : `<span class="x">${esc(ratioText(it))}</span>`}</span>
+    </button>`).join("") + (rows.length > shown ? `<button class="chip more" id="more">Mostrar mais ${Math.min(60, rows.length - shown)}</button>` : "");
+  listEl.querySelectorAll(".row").forEach(b => b.onclick = () => open(+b.dataset.id));
+  const m = document.getElementById("more"); if (m) m.onclick = () => { shown += 60; renderList(false); };
+  if (selectFirst) { listEl.scrollTop = 0; if (rows.length) open(rows[0].id); }
+}
+async function open(id) {
+  current = id;
+  listEl.querySelectorAll(".row").forEach(b => b.setAttribute("aria-current", +b.dataset.id === id));
+  const r = await fetch(`/api/item/${id}`); const it = await r.json();
+  if (current === id) mount(sheetFila, sheet(it), it);
+}
+
+/* --------------------------------------------------------- analyze */
+const EXAMPLES = [
+  { t: "Switch 24 portas", d: "Switch gerenciável camada 2, 24 portas Gigabit Ethernet 10/100/1000 e 4 portas SFP, suporte a VLAN e QoS, montável em rack 19 polegadas", p: "18900", q: "4" },
+  { t: "Mouse óptico", d: "Mouse óptico USB com fio, resolução de 1000 dpi, 3 botões com scroll, cor preta", p: "32,90", q: "200" },
+  { t: "Notebook genérico", d: "Notebook, conforme especificações do Termo de Referência", p: "7500", q: "10" },
+];
+const ex = document.getElementById("examples");
+ex.innerHTML = EXAMPLES.map((e, i) => `<button type="button" class="exb" data-i="${i}"><b>${e.t}</b> · R$ ${e.p} · ${esc(e.d.slice(0, 64))}…</button>`).join("");
+ex.querySelectorAll(".exb").forEach(b => b.onclick = () => {
+  const e = EXAMPLES[+b.dataset.i];
+  document.getElementById("f-desc").value = e.d; document.getElementById("f-preco").value = e.p; document.getElementById("f-qtd").value = e.q;
+  document.getElementById("form").requestSubmit();
+});
+const num = s => { s = (s || "").trim().replace(/\./g, "").replace(",", "."); return s ? Number(s) : null; };
+document.getElementById("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const err = document.getElementById("f-err"), go = document.getElementById("f-go"), out = document.getElementById("sheet-analisar");
+  const desc = document.getElementById("f-desc").value.trim(), preco = num(document.getElementById("f-preco").value), qtd = num(document.getElementById("f-qtd").value);
+  err.textContent = "";
+  if (desc.length < 8) { err.textContent = "Escreva a descrição do item (pelo menos algumas palavras)."; return; }
+  if (preco != null && !(preco > 0)) { err.textContent = "O preço precisa ser um número maior que zero, como 1.250,00."; return; }
+  go.disabled = true; go.textContent = "Lendo a descrição…"; out.innerHTML = skeleton();
+  try {
+    const r = await fetch("/api/analisar", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ descricao: desc, preco, quantidade: qtd }) });
+    const it = await r.json();
+    if (!r.ok) throw new Error(it.detail?.[0]?.msg || it.detail || "erro");
+    mount(out, sheet(it), it);
+  } catch (x) {
+    out.innerHTML = `<div class="empty"><div><h2>Não deu para analisar</h2><p>${esc(x.message)}. Tente de novo em alguns segundos.</p></div></div>`;
+  } finally { go.disabled = false; go.textContent = "Analisar"; }
+});
+
+/* ------------------------------------------------------------- tabs */
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  document.querySelectorAll(".tab").forEach(o => o.setAttribute("aria-selected", o === t));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + t.dataset.view));
+});
+loadQueue();
+</script>
+</body>
+</html>

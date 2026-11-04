@@ -5,9 +5,9 @@ each tender line item and answers 19 structured questions (40 numeric columns); 
 learns, from prices actually paid, how to turn those answers into a price.
 Tenders whose estimate disagrees with the model go to a human queue.
 
-> Status: **experimental**. The pilot below is real and reproducible from
-> this repo, but it was measured on tender-level totals. The item-level
-> rerun on paid unit prices is in progress. Nothing here is production.
+> Status: **experimental**. Measured on paid unit prices with a locked
+> holdout, and served by a small demo app (triage queue + live analysis).
+> Nothing here is production.
 
 ---
 
@@ -66,8 +66,34 @@ flowchart LR
 | `precojusto/ladder.py` | the ablation ladder, dev CV by default, `--final` scores the holdout once |
 | `precojusto/sources/` | resumable, append-only pullers for both APIs, plus the item-level cleaner |
 | `precojusto/sectors.py` | three pre-declared sectors and their keyword filters |
+| `precojusto/items.py` | item-level datasets: cleaned paid prices (train) and PNCP estimates (audit) |
+| `precojusto/model.py` | the app model: GB + quantile GB, conformal range, verdicts with abstention |
+| `precojusto/app/` | FastAPI + one static page: the triage queue and "analisar um item" |
 
-## Pilot results
+## Results on paid unit prices
+
+3 000 catalogue descriptions (IT equipment, Compras.gov.br 2024–2026),
+target = log10 of the median unit price paid, split by **catalogue code** so
+every score is on items the model never saw. Holdout (901 rows) scored
+once; full log, cleaning report and dev numbers in
+[docs/experiments.md](docs/experiments.md#item-level-paid-unit-prices-2026-11-04).
+
+| Rung (holdout) | RMSE | within 2x |
+|---|---|---|
+| 1. mean | 0.833 | 23.8% |
+| 4. TF-IDF + GB | 0.477 | 53.6% |
+| 5. LLM direct price, no model | 0.483 | 52.7% |
+| 7. LLM features + det (GB) | 0.417 | 60.2% |
+| 9. LLM + TF-IDF + det (GB) | 0.405 | 61.0% |
+| **10. 7 + similar paid purchases (app model)** | **0.351** | **69.0%** |
+
+The app model's 80% range holds 82.8% of held-out paid prices (median width
+7.4x). Run against 1 429 PNCP line items with estimated prices, it flags 20
+for review and abstains on 1 319 (not IT equipment, too generic, no
+comparable paid purchase, or range too wide), each gate there because of a
+wrong verdict it stops.
+
+## Pilot results (tender totals)
 
 478 tenders (dev split), 5-fold CV, target = log10 of the tender total,
 sector = IT. Lower RMSE/MAE is better; "within 2x" is the share of
@@ -142,14 +168,12 @@ anomaly queue only needs the second. Full log in
 
 ## What is not done
 
-- Run the LLM over the Compras.gov.br item rows and rebuild the ladder on
-  paid unit prices (the crawl is at ~10k purchases across 361 catalogue codes).
-- Rung 2 on real data, and the risk-coverage curve on it.
-- Model the auction discount (paid < estimated) so that comparing the two
-  does not flag every tender.
+- Model the auction discount from matched pairs; today it is a fixed 1.5x
+  margin on top of the range.
+- Separate original from compatible supplies in the paid data (the toner
+  false positives).
 - Item-level data for medicines and fuels.
-- Bias audit by government sphere and municipality size; calibration plot.
-- Score the holdout. Once.
+- Bias audit by government sphere and municipality size.
 
 ## Run it
 
@@ -169,6 +193,13 @@ python -m precojusto.sources.comprasgov --group 70
 python -m precojusto.sources.pncp --year 2026 --months 4-9
 
 python -m precojusto.ladder --final           # the holdout. Once.
+
+# Item level and the demo app (pip install -e ".[app]")
+python -m precojusto.items train-set          # clean + aggregate paid prices
+python -m precojusto.features --input data/items/train.jsonl --output data/items/features.jsonl
+python -m precojusto.model train              # both neighbour regimes, dev CV
+python -m precojusto.model queue              # batch: PNCP items -> queue.json
+python -m precojusto.app                      # http://127.0.0.1:8000
 ```
 
 `data/pilot/` ships the pilot dataset and its LLM features, so the ladder
@@ -180,6 +211,7 @@ runs with no API key.
 precojusto/         the package (schema, features, splits, ladder, sources)
 tests/              unit tests: feature conversion, split leakage, ladder smoke
 data/pilot/         682 tenders + features + recorded pilot results (committed)
+data/items/         item-level features, paid-price index, audit features, results
 data/raw/           crawls and the LLM cache (gitignored, regenerable)
 docs/               architecture, decision records, experiment log, API notes,
                     interface plan

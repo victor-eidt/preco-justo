@@ -45,7 +45,10 @@ from .splits import group_folds, holdout_split
 
 #: Columns that answer "what is the price?" directly. Never features.
 DIRECT_COLUMNS = ["direct__log10", "direct__conf", "faixa_preco__nivel", "faixa_preco__disp"]
-GROUP_KEYS = ("tender", "idCompra")
+#: First key present wins. ``group`` is the catalogue code on item-level rows
+#: (``items.train-set``): the model is scored on catalogue items it never saw,
+#: which is the situation of a PNCP item with no code.
+GROUP_KEYS = ("group", "tender", "idCompra")
 CATALOGUE_KEY = "codigoItemCatalogo"
 
 

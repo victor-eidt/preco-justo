@@ -119,3 +119,109 @@ R$ 4 765, min R$ 290, max R$ 49 900 (10.5x the median). The LLM's direct
 guess for one of them was R$ 3 266 against R$ 4 899 paid: a 1.5x miss,
 versus ~3x typical at tender level. Early sign that unit prices are more
 predictable, as expected.
+
+---
+
+# Item level: paid unit prices (2026-11-04)
+
+The re-measurement the notes above promised. Target = log10 of the unit
+price actually **paid** (Compras.gov.br, group 70, IT equipment, 2024–2026).
+
+**Data.** 85 972 purchases → cleaning (`items.clean_paid`, reported, not
+silent): 3 532 dropped for a unit other than `UN`, 1 680 outside
+R$ 5–300 000, 3 964 more than 10x from their catalogue code's median (mostly
+lot totals typed as unit prices; see the dirty-outlier notes). 76 796 kept,
+aggregated to 11 077 (code, description) rows with the median paid price.
+3 000 of the 5 604 rows with at least two purchases were sampled (seed 7)
+and read by the LLM: 0 failures, ~0.2 s per item.
+
+**Split.** Grouped by **catalogue code**: the model is always scored on
+catalogue items it never saw, which is the situation of a PNCP line with no
+code. 70/30 with seed 12345 → dev 2 099 rows, holdout 901. Rung 2
+(catalogue median) therefore always falls back to the global median: by
+construction there is no code to look up, and that is the point.
+
+## 1. The ladder (dev CV and the holdout, scored once)
+
+| Rung | dev RMSE | holdout RMSE | holdout within 2x |
+|---|---|---|---|
+| 1. mean | 0.877 | 0.833 | 23.8% |
+| 2. catalogue median (no code seen) | 0.877 | 0.834 | 23.9% |
+| 3. deterministic + GB | 0.673 | 0.629 | 43.1% |
+| 4. TF-IDF + GB | 0.529 | 0.477 | 53.6% |
+| 5. LLM direct, no model | 0.506 | 0.483 | 52.7% |
+| 6. LLM features + det (RF) | 0.454 | 0.412 | 60.7% |
+| 7. LLM features + det (GB) | 0.458 | 0.417 | 60.2% |
+| 8. LLM features + det (MLP) | 8.125* | 0.455 | 55.2% |
+| 9. LLM + TF-IDF + det (GB) | 0.459 | 0.405 | 61.0% |
+| 10a. 7 + similar paid purchases, strict | 0.417 | 0.389 | 64.7% |
+| **10b. 7 + similar paid purchases (app model)** | **0.394** | **0.351** | **69.0%** |
+
+\* one fold produced an extreme prediction (overflow); MAE was 0.548. The MLP
+is there to show the deep model does not win on 36 columns and ~2k rows;
+on the holdout it lands between TF-IDF and the shallow models.
+
+The pilot's hypothesis holds on the new target: LLM features + a shallow
+model beat both the model without the LLM (rungs 3–4) and the LLM without
+the model (rung 5).
+
+**Rung 10 adds five columns** from a text search over all 11 077 paid rows:
+weighted median/mean/spread of the 10 most similar paid prices, the top
+neighbour's price and its similarity. On training rows the search must not
+see the row's own price. Two ways to hide it, both reported:
+
+- **10a, strict:** hide every purchase of the row's catalogue code.
+- **10b, app model:** hide only the row's own (code, description) entry;
+  other descriptions of the same catalogue item stay visible.
+
+10b is the honest model for auditing: a PNCP line is compared against the
+whole paid database, where its real catalogue item, under another wording,
+usually is. 10a was tried first, and it broke the demo: having never seen
+a near-identical neighbour in training, the model ignored one at audit time
+(a 48-port 25 Gb SFP28 switch predicted at R$ 4 138 while its paid twin,
+similarity 0.99, cost R$ 116 000).
+
+## 2. The range and the abstention
+
+Two extra quantile models (10% and 90%), widened by conformal calibration on
+out-of-fold errors, give an 80% range. The widest 20% of dev ranges set the
+abstention cut (12.5x wide).
+
+| | dev CV (10b) | holdout (10b) |
+|---|---|---|
+| paid price inside the range | 80.1% | 82.8% |
+| median range width | 7.9x | 7.4x |
+| answered (range under the cut) | 80.0% | 84.6% |
+| within 2x, answered only | 71.4% | 73.8% |
+
+## 3. The audit queue (PNCP, estimated prices)
+
+1 213 IT-equipment tenders listed → 1 605 material items from the item
+endpoint → 1 429 after dedup and the price range, read by the LLM.
+
+Verdict rules (`model.verdict`), fixed before the queue was read item by
+item: **needs review** when the estimate exceeds the top of the range by
+1.5x (the auction discount: estimates sit above paid prices as a rule);
+**abstain** when the item is not IT equipment (LLM category), the
+description is too generic (LLM specificity < 1.5; every catalogue row
+reads ≥ 2), the price is not per unit, the range is wider than the cut, or
+no paid purchase reaches similarity 0.3.
+
+Result: **20 need review, 90 within the expected range, 1 319 abstain.**
+The abstention is large on purpose: most lines in "IT" tenders are not IT
+equipment (fuses, folders, conduit boxes) or are worded nothing like the
+catalogue. Each gate was added after seeing a wrong verdict it would have
+stopped:
+
+- generic text ("Microcomputador", "Notebook, conforme Termo de
+  Referência") was predicted at ~R$ 250, far outside anything in training;
+- with no similar paid purchase, a 21.5" monitor came out at R$ 3 895 and a
+  Samsung smartphone at R$ 153.
+
+**Known false positives among the 20:** Canon GPR-53 *original* toners at
+R$ 1 440 are flagged because the catalogue code mixes originals with
+compatibles at ~R$ 40 (see the dirty-outlier notes). The flag is a request
+to look, and the sheet shows the evidence that makes a person discard it.
+
+Reproduce: `python -m precojusto.model train`, `... final` (done once),
+`... queue`. Numbers: `data/items/results_*.csv`.

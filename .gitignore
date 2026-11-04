@@ -24,3 +24,10 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Item level: regenerable artefacts (model.py train / queue) and live LLM cache
+data/items/model.pkl
+data/items/queue.json
+data/items/live_cache.json
+data/items/train.jsonl
+data/items/audit.jsonl

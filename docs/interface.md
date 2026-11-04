@@ -1,7 +1,8 @@
 # Interface plan
 
-Status: **planned, not started** (2026-09-23). Target: a working demo by
-early November 2026.
+Status: **built, lean** (2026-11-04): the queue and the item sheet, plus
+"Analisar um item" live. The evidence page went to the defense slides
+instead. Code in `precojusto/app/`.
 
 Today the project is code and logs. This is the plan for the surface a
 person actually uses, and the reasoning behind it.
