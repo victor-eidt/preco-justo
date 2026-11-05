@@ -31,3 +31,6 @@ data/items/queue.json
 data/items/live_cache.json
 data/items/train.jsonl
 data/items/audit.jsonl
+
+# Local secrets
+.env*

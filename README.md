@@ -1,7 +1,7 @@
 # Preço Justo
 
 **Fair-price estimation for Brazilian public procurement.** A typed LLM reads
-each tender line item and answers 19 structured questions (40 numeric columns); a shallow model
+each tender line item and answers 19 structured questions (36 numeric columns); a shallow model
 learns, from prices actually paid, how to turn those answers into a price.
 Tenders whose estimate disagrees with the model go to a human queue.
 
